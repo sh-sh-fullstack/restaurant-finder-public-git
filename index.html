@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://maps.googleapis.com https://maps.gstatic.com; style-src 'unsafe-inline'; img-src https://*.googleapis.com https://*.gstatic.com data: blob:; connect-src https://*.googleapis.com; font-src https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'none';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://restuarant-finder-link.shivank-sharma.workers.dev; frame-ancestors 'none'; base-uri 'self'; form-action 'none';" />
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>Restaurant Finder</title>
@@ -231,27 +231,19 @@
 <div id="resultsMeta" class="results-meta"></div>
 <div id="results" class="results"></div>
 
-<!-- Google Maps JavaScript API (Places library) -->
 <script>
-  const API_KEY = 'REPLACED';
+  const WORKER = 'https://restuarant-finder-link.shivank-sharma.workers.dev/';
 
   const PRICE_LABELS = { 0: 'Free', 1: '$', 2: '$$', 3: '$$$', 4: '$$$$' };
   const MIN_REVIEWS   = 1000;
   const RADIUS_METERS = 8047; // 5 miles
 
-  let map, placesService, mapsLoadFailed = false;
-
-  // Called by the Google Maps script tag on load
-  function initMap() {
-    map = new google.maps.Map(document.createElement('div'));
-    placesService = new google.maps.places.PlacesService(map);
-    setStatus('');
-  }
-
-  // Called by the Google Maps script tag if it fails to load
-  function handleMapsError() {
-    mapsLoadFailed = true;
-    setStatus('Google Maps API could not be reached. Please check your API key or network connection.', true);
+  function workerFetch(endpoint, params) {
+    const url = `${WORKER}?endpoint=${encodeURIComponent(endpoint)}&params=${encodeURIComponent(new URLSearchParams(params).toString())}`;
+    return fetch(url).then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    });
   }
 
   function setStatus(msg, isError = false, loading = false) {
@@ -269,59 +261,60 @@
   function startSearch() {
     const raw = document.getElementById('locationInput').value.trim();
     if (!raw) { setStatus('Please enter a ZIP code or city name.', true); return; }
-    if (mapsLoadFailed) { setStatus('Google Maps API could not be reached. Please check your API key or network connection.', true); return; }
-    if (!placesService) { setStatus('Google Maps API is still loading. Please try again in a moment.', true); return; }
 
     document.getElementById('results').innerHTML = '';
     document.getElementById('resultsMeta').textContent = '';
     setStatus('Geocoding location...', false, true);
     document.getElementById('searchBtn').disabled = true;
 
-    let geocodeResponded = false;
-    const geocodeTimeout = setTimeout(() => {
-      if (!geocodeResponded) {
-        setStatus('Google Maps API is not responding. The API key may be missing or invalid.', true);
+    workerFetch('maps/api/geocode/json', { address: raw })
+      .then(data => {
+        if (data.status !== 'OK' || !data.results.length) {
+          setStatus(`Could not find location "${raw}". Try a different ZIP or city.`, true);
+          document.getElementById('searchBtn').disabled = false;
+          return;
+        }
+        searchRestaurants(data.results[0].geometry.location);
+      })
+      .catch(() => {
+        setStatus('Could not reach the search service. Please check your network connection.', true);
         document.getElementById('searchBtn').disabled = false;
-      }
-    }, 5000);
-
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ address: raw }, (results, status) => {
-      geocodeResponded = true;
-      clearTimeout(geocodeTimeout);
-      if (status !== 'OK' || !results.length) {
-        setStatus(`Could not find location "${raw}". Try a different ZIP or city.`, true);
-        document.getElementById('searchBtn').disabled = false;
-        return;
-      }
-      const location = results[0].geometry.location;
-      searchRestaurants(location);
-    });
+      });
   }
 
   function searchRestaurants(location) {
     setStatus('Searching for restaurants...', false, true);
     const allResults = [];
 
-    function handlePage(results, status, pagination) {
-      if (status === google.maps.places.PlacesServiceStatus.OK) {
-        allResults.push(...results);
-        if (pagination && pagination.hasNextPage) {
-          // nextPage() re-fires this same callback with the next batch
-          setTimeout(() => pagination.nextPage(), 300);
-        } else {
-          renderResults(allResults, location);
-        }
-      } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
-        setStatus('No restaurants found near that location.');
-        document.getElementById('searchBtn').disabled = false;
-      } else {
-        setStatus(`Places API error: ${status}`, true);
-        document.getElementById('searchBtn').disabled = false;
-      }
+    function fetchPage(pageToken) {
+      const params = { location: `${location.lat},${location.lng}`, radius: RADIUS_METERS, type: 'restaurant' };
+      if (pageToken) params.pagetoken = pageToken;
+
+      workerFetch('maps/api/place/nearbysearch/json', params)
+        .then(data => {
+          if (data.status === 'OK') {
+            allResults.push(...data.results);
+            if (data.next_page_token) {
+              // Google requires ~2s before next_page_token becomes valid
+              setTimeout(() => fetchPage(data.next_page_token), 2000);
+            } else {
+              renderResults(allResults);
+            }
+          } else if (data.status === 'ZERO_RESULTS') {
+            setStatus('No restaurants found near that location.');
+            document.getElementById('searchBtn').disabled = false;
+          } else {
+            setStatus(`Places API error: ${data.status}`, true);
+            document.getElementById('searchBtn').disabled = false;
+          }
+        })
+        .catch(() => {
+          setStatus('Could not reach the search service. Please check your network connection.', true);
+          document.getElementById('searchBtn').disabled = false;
+        });
     }
 
-    placesService.nearbySearch({ location, radius: RADIUS_METERS, type: 'restaurant' }, handlePage);
+    fetchPage(null);
   }
 
   function starsHtml(rating) {
@@ -396,7 +389,7 @@
     return 'Restaurant';
   }
 
-  function renderResults(all, location) {
+  function renderResults(all) {
     const filtered = all
       .filter(p => p.user_ratings_total >= MIN_REVIEWS && p.rating)
       .sort((a, b) => b.user_ratings_total - a.user_ratings_total);
@@ -460,11 +453,6 @@
   });
 </script>
 
-<script
-  src="https://maps.googleapis.com/maps/api/js?key=REPLACED&libraries=places&callback=initMap"
-  onerror="handleMapsError()"
-  async defer>
-</script>
 
 </body>
 </html>
