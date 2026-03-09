@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Restaurant Finder</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f5f5f0;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e5e5e5;
+      padding: 20px 24px;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 3px;
+    }
+
+    .search-bar {
+      background: #fff;
+      border-bottom: 1px solid #e5e5e5;
+      padding: 16px 24px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .search-bar input {
+      flex: 1;
+      min-width: 200px;
+      padding: 10px 14px;
+      border: 1px solid #d0d0d0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-bar input:focus {
+      border-color: #4f46e5;
+    }
+
+    .search-bar button {
+      padding: 10px 22px;
+      background: #4f46e5;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+
+    .search-bar button:hover { background: #4338ca; }
+    .search-bar button:disabled { background: #a5a3d8; cursor: not-allowed; }
+
+    .status {
+      padding: 12px 24px;
+      font-size: 0.875rem;
+      color: #555;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status.error { color: #dc2626; }
+
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid #d0d0d0;
+      border-top-color: #4f46e5;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .results-meta {
+      padding: 4px 24px 12px;
+      font-size: 0.8rem;
+      color: #888;
+    }
+
+    .results {
+      padding: 0 24px 40px;
+      display: grid;
+      gap: 14px;
+      max-width: 900px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px 16px;
+      transition: box-shadow 0.15s;
+    }
+
+    .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+
+    .card-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #111;
+      grid-column: 1;
+    }
+
+    .card-rating-block {
+      grid-column: 2;
+      grid-row: 1 / 3;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .stars {
+      font-size: 0.95rem;
+      color: #f59e0b;
+      letter-spacing: 1px;
+    }
+
+    .review-count {
+      font-size: 0.78rem;
+      color: #777;
+    }
+
+    .card-meta {
+      grid-column: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .tag-price {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .tag-cuisine {
+      background: #ede9fe;
+      color: #4c1d95;
+    }
+
+    .tag-open {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .tag-closed {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .card-address {
+      grid-column: 1 / -1;
+      font-size: 0.8rem;
+      color: #777;
+      margin-top: 4px;
+    }
+
+    .empty-state {
+      padding: 60px 24px;
+      text-align: center;
+      color: #aaa;
+      font-size: 0.95rem;
+    }
+
+    .empty-state svg {
+      display: block;
+      margin: 0 auto 16px;
+      opacity: 0.35;
+    }
+
+    @media (max-width: 520px) {
+      .card { grid-template-columns: 1fr; }
+      .card-rating-block { grid-row: unset; align-items: flex-start; flex-direction: row; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Restaurant Finder</h1>
+  <p>Find highly-reviewed restaurants near any ZIP code or city</p>
+</header>
+
+<div class="search-bar">
+  <input id="locationInput" type="text" placeholder="Enter ZIP code or city name (e.g. 10001 or Austin, TX)" />
+  <button id="searchBtn" onclick="startSearch()">Search</button>
+</div>
+
+<div id="status" class="status"></div>
+<div id="resultsMeta" class="results-meta"></div>
+<div id="results" class="results"></div>
+
+<!-- Google Maps JavaScript API (Places library) -->
+<script>
+  const API_KEY = 'REPLACED';
+
+  const PRICE_LABELS = { 0: 'Free', 1: '$', 2: '$$', 3: '$$$', 4: '$$$$' };
+  const MIN_REVIEWS   = 1000;
+  const RADIUS_METERS = 8047; // 5 miles
+
+  let map, placesService;
+
+  // Called by the Google Maps script tag on load
+  function initMap() {
+    map = new google.maps.Map(document.createElement('div'));
+    placesService = new google.maps.places.PlacesService(map);
+    setStatus('');
+  }
+
+  function setStatus(msg, isError = false, loading = false) {
+    const el = document.getElementById('status');
+    el.className = 'status' + (isError ? ' error' : '');
+    el.innerHTML = loading
+      ? `<div class="spinner"></div>${msg}`
+      : msg;
+  }
+
+  function startSearch() {
+    const raw = document.getElementById('locationInput').value.trim();
+    if (!raw) { setStatus('Please enter a ZIP code or city name.', true); return; }
+
+    document.getElementById('results').innerHTML = '';
+    document.getElementById('resultsMeta').textContent = '';
+    setStatus('Geocoding location...', false, true);
+    document.getElementById('searchBtn').disabled = true;
+
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ address: raw }, (results, status) => {
+      if (status !== 'OK' || !results.length) {
+        setStatus(`Could not find location "${escHtml(raw)}". Try a different ZIP or city.`, true);
+        document.getElementById('searchBtn').disabled = false;
+        return;
+      }
+      const location = results[0].geometry.location;
+      searchRestaurants(location);
+    });
+  }
+
+  function searchRestaurants(location) {
+    setStatus('Searching for restaurants...', false, true);
+    const allResults = [];
+
+    function handlePage(results, status, pagination) {
+      if (status === google.maps.places.PlacesServiceStatus.OK) {
+        allResults.push(...results);
+        if (pagination && pagination.hasNextPage) {
+          // nextPage() re-fires this same callback with the next batch
+          setTimeout(() => pagination.nextPage(), 300);
+        } else {
+          renderResults(allResults, location);
+        }
+      } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+        setStatus('No restaurants found near that location.');
+        document.getElementById('searchBtn').disabled = false;
+      } else {
+        setStatus(`Places API error: ${status}`, true);
+        document.getElementById('searchBtn').disabled = false;
+      }
+    }
+
+    placesService.nearbySearch({ location, radius: RADIUS_METERS, type: 'restaurant' }, handlePage);
+  }
+
+  function starsHtml(rating) {
+    const full  = Math.floor(rating);
+    const half  = rating - full >= 0.5 ? 1 : 0;
+    const empty = 5 - full - half;
+    return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+  }
+
+  // Keyword → cuisine, matched against lowercased restaurant name
+  const NAME_KEYWORDS = [
+    ['indian', 'Indian'], ['india', 'Indian'],
+    ['madras', 'Indian'], ['tandoor', 'Indian'], ['curry', 'Indian'],
+    ['biryani', 'Indian'], ['masala', 'Indian'], ['punjabi', 'Indian'],
+    ['kerala', 'Indian'], ['dosa', 'Indian'], ['idli', 'Indian'],
+    ['mughal', 'Indian'], ['spice', 'Indian'], ['chai', 'Indian'],
+    ['sushi', 'Japanese'], ['ramen', 'Japanese'], ['udon', 'Japanese'],
+    ['tempura', 'Japanese'], ['japanese', 'Japanese'], ['izakaya', 'Japanese'],
+    ['teriyaki', 'Japanese'], ['yakitori', 'Japanese'],
+    ['taco', 'Mexican'], ['burrito', 'Mexican'], ['mexican', 'Mexican'],
+    ['cantina', 'Mexican'], ['hacienda', 'Mexican'], ['enchilada', 'Mexican'],
+    ['pizza', 'Italian'], ['italian', 'Italian'], ['trattoria', 'Italian'],
+    ['osteria', 'Italian'], ['pasta', 'Italian'],
+    ['chinese', 'Chinese'], ['dim sum', 'Chinese'], ['wok', 'Chinese'],
+    ['szechuan', 'Chinese'], ['sichuan', 'Chinese'], ['cantonese', 'Chinese'],
+    ['pho', 'Vietnamese'], ['vietnamese', 'Vietnamese'], ['viet', 'Vietnamese'],
+    ['banh mi', 'Vietnamese'],
+    ['korean', 'Korean'], ['kimchi', 'Korean'],
+    ['thai', 'Thai'], ['pad thai', 'Thai'],
+    ['mediterranean', 'Mediterranean'], ['falafel', 'Mediterranean'],
+    ['hummus', 'Mediterranean'], ['greek', 'Greek'], ['gyro', 'Greek'],
+    ['lebanese', 'Lebanese'], ['shawarma', 'Middle Eastern'],
+    ['kebab', 'Middle Eastern'], ['persian', 'Middle Eastern'],
+    ['turkish', 'Turkish'],
+    ['burger', 'American'], ['bbq', 'BBQ'], ['barbecue', 'BBQ'],
+    ['steakhouse', 'Steakhouse'], ['steak', 'Steakhouse'],
+    ['seafood', 'Seafood'], ['fish', 'Seafood'], ['crab', 'Seafood'],
+    ['french', 'French'], ['brasserie', 'French'], ['bistro', 'French'],
+    ['spanish', 'Spanish'], ['tapas', 'Spanish'],
+    ['vegan', 'Vegan'], ['vegetarian', 'Vegetarian'],
+  ];
+
+  // Types-based fallback (generic)
+  const TYPE_CUISINE = {
+    indian_restaurant: 'Indian', japanese_restaurant: 'Japanese',
+    chinese_restaurant: 'Chinese', mexican_restaurant: 'Mexican',
+    italian_restaurant: 'Italian', thai_restaurant: 'Thai',
+    vietnamese_restaurant: 'Vietnamese', korean_restaurant: 'Korean',
+    mediterranean_restaurant: 'Mediterranean', greek_restaurant: 'Greek',
+    french_restaurant: 'French', american_restaurant: 'American',
+    barbecue_restaurant: 'BBQ', seafood_restaurant: 'Seafood',
+    pizza_restaurant: 'Pizza', sushi_restaurant: 'Sushi',
+    ramen_restaurant: 'Ramen', steak_house: 'Steakhouse',
+    hamburger_restaurant: 'Burgers', fast_food_restaurant: 'Fast Food',
+    breakfast_restaurant: 'Breakfast', bakery: 'Bakery',
+    cafe: 'Cafe', bar: 'Bar & Grill', coffee_shop: 'Coffee Shop',
+  };
+
+  function getCuisine(place) {
+    const name = (place.name || '').toLowerCase();
+
+    // Pass 1: keyword match on restaurant name (most reliable)
+    for (const [kw, label] of NAME_KEYWORDS) {
+      if (name.includes(kw)) return label;
+    }
+
+    // Pass 2: specific type from Places API
+    for (const type of (place.types || [])) {
+      if (TYPE_CUISINE[type]) return TYPE_CUISINE[type];
+    }
+
+    return 'Restaurant';
+  }
+
+  function renderResults(all, location) {
+    const filtered = all
+      .filter(p => p.user_ratings_total >= MIN_REVIEWS && p.rating)
+      .sort((a, b) => b.user_ratings_total - a.user_ratings_total);
+
+    document.getElementById('searchBtn').disabled = false;
+
+    if (!filtered.length) {
+      setStatus('');
+      document.getElementById('resultsMeta').textContent = '';
+      document.getElementById('results').innerHTML = `
+        <div class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          No restaurants with 1,000+ reviews found within 5 miles.
+          <br>Try a different location or city center.
+        </div>`;
+      return;
+    }
+
+    setStatus('');
+    document.getElementById('resultsMeta').textContent =
+      `Showing ${filtered.length} restaurant${filtered.length !== 1 ? 's' : ''} with 1,000+ reviews — sorted by review count`;
+
+    const html = filtered.map(place => {
+      const cuisine = getCuisine(place);
+      const price   = PRICE_LABELS[place.price_level];
+      const open    = place.opening_hours?.open_now;
+      const openTag = open === true
+        ? `<span class="tag tag-open">Open now</span>`
+        : open === false
+          ? `<span class="tag tag-closed">Closed</span>`
+          : '';
+
+      return `
+        <div class="card">
+          <div class="card-name">${escHtml(place.name)}</div>
+          <div class="card-rating-block">
+            <div class="stars">${starsHtml(place.rating)}</div>
+            <div class="review-count">${place.rating.toFixed(1)} · ${place.user_ratings_total.toLocaleString()} reviews</div>
+          </div>
+          <div class="card-meta">
+            ${price   ? `<span class="tag tag-price">${price}</span>` : ''}
+            ${cuisine ? `<span class="tag tag-cuisine">${escHtml(cuisine)}</span>` : ''}
+            ${openTag}
+          </div>
+          <div class="card-address">${escHtml(place.vicinity || '')}</div>
+        </div>`;
+    }).join('');
+
+    document.getElementById('results').innerHTML = html;
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Allow pressing Enter to search
+  document.getElementById('locationInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') startSearch();
+  });
+</script>
+
+<script
+  src="https://maps.googleapis.com/maps/api/js?key=REPLACED&libraries=places&callback=initMap"
+  async defer>
+</script>
+
+</body>
+</html>
