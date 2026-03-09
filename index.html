@@ -239,7 +239,8 @@
   const RADIUS_METERS = 8047; // 5 miles
 
   function workerFetch(endpoint, params) {
-    const url = `${WORKER}?endpoint=${encodeURIComponent(endpoint)}&params=${encodeURIComponent(new URLSearchParams(params).toString())}`;
+    const paramStr = Object.entries(params).map(([k, v]) => `${k}=${v}`).join('&');
+    const url = `${WORKER}?endpoint=${encodeURIComponent(endpoint)}&params=${encodeURIComponent(paramStr)}`;
     return fetch(url).then(r => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       return r.json();
