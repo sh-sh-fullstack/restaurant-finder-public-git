@@ -240,7 +240,6 @@
 
   function workerFetch(endpoint, params) {
     const url = `${WORKER}?endpoint=${encodeURIComponent(endpoint)}&params=${encodeURIComponent(new URLSearchParams(params).toString())}`;
-    console.log('[workerFetch] URL:', url);
     return fetch(url).then(r => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       return r.json();
