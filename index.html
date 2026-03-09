@@ -239,13 +239,19 @@
   const MIN_REVIEWS   = 1000;
   const RADIUS_METERS = 8047; // 5 miles
 
-  let map, placesService;
+  let map, placesService, mapsLoadFailed = false;
 
   // Called by the Google Maps script tag on load
   function initMap() {
     map = new google.maps.Map(document.createElement('div'));
     placesService = new google.maps.places.PlacesService(map);
     setStatus('');
+  }
+
+  // Called by the Google Maps script tag if it fails to load
+  function handleMapsError() {
+    mapsLoadFailed = true;
+    setStatus('Google Maps API could not be reached. Please check your API key or network connection.', true);
   }
 
   function setStatus(msg, isError = false, loading = false) {
@@ -263,6 +269,8 @@
   function startSearch() {
     const raw = document.getElementById('locationInput').value.trim();
     if (!raw) { setStatus('Please enter a ZIP code or city name.', true); return; }
+    if (mapsLoadFailed) { setStatus('Google Maps API could not be reached. Please check your API key or network connection.', true); return; }
+    if (!placesService) { setStatus('Google Maps API is still loading. Please try again in a moment.', true); return; }
 
     document.getElementById('results').innerHTML = '';
     document.getElementById('resultsMeta').textContent = '';
@@ -444,6 +452,7 @@
 
 <script
   src="https://maps.googleapis.com/maps/api/js?key=REPLACED&libraries=places&callback=initMap"
+  onerror="handleMapsError()"
   async defer>
 </script>
 
