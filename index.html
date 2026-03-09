@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://maps.googleapis.com https://maps.gstatic.com; style-src 'unsafe-inline'; img-src https://*.googleapis.com https://*.gstatic.com data: blob:; connect-src https://*.googleapis.com; font-src https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'none';" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>Restaurant Finder</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -220,7 +223,7 @@
 </header>
 
 <div class="search-bar">
-  <input id="locationInput" type="text" placeholder="Enter ZIP code or city name (e.g. 10001 or Austin, TX)" />
+  <input id="locationInput" type="text" maxlength="100" placeholder="Enter ZIP code or city name (e.g. 10001 or Austin, TX)" />
   <button id="searchBtn" onclick="startSearch()">Search</button>
 </div>
 
@@ -248,9 +251,13 @@
   function setStatus(msg, isError = false, loading = false) {
     const el = document.getElementById('status');
     el.className = 'status' + (isError ? ' error' : '');
-    el.innerHTML = loading
-      ? `<div class="spinner"></div>${msg}`
-      : msg;
+    el.innerHTML = '';
+    if (loading) {
+      const spinner = document.createElement('div');
+      spinner.className = 'spinner';
+      el.appendChild(spinner);
+    }
+    if (msg) el.appendChild(document.createTextNode(msg));
   }
 
   function startSearch() {
@@ -265,7 +272,7 @@
     const geocoder = new google.maps.Geocoder();
     geocoder.geocode({ address: raw }, (results, status) => {
       if (status !== 'OK' || !results.length) {
-        setStatus(`Could not find location "${escHtml(raw)}". Try a different ZIP or city.`, true);
+        setStatus(`Could not find location "${raw}". Try a different ZIP or city.`, true);
         document.getElementById('searchBtn').disabled = false;
         return;
       }
@@ -414,7 +421,7 @@
             <div class="review-count">${place.rating.toFixed(1)} · ${place.user_ratings_total.toLocaleString()} reviews</div>
           </div>
           <div class="card-meta">
-            ${price   ? `<span class="tag tag-price">${price}</span>` : ''}
+            ${price   ? `<span class="tag tag-price">${escHtml(price)}</span>` : ''}
             ${cuisine ? `<span class="tag tag-cuisine">${escHtml(cuisine)}</span>` : ''}
             ${openTag}
           </div>
