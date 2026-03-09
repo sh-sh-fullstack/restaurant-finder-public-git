@@ -277,8 +277,18 @@
     setStatus('Geocoding location...', false, true);
     document.getElementById('searchBtn').disabled = true;
 
+    let geocodeResponded = false;
+    const geocodeTimeout = setTimeout(() => {
+      if (!geocodeResponded) {
+        setStatus('Google Maps API is not responding. The API key may be missing or invalid.', true);
+        document.getElementById('searchBtn').disabled = false;
+      }
+    }, 5000);
+
     const geocoder = new google.maps.Geocoder();
     geocoder.geocode({ address: raw }, (results, status) => {
+      geocodeResponded = true;
+      clearTimeout(geocodeTimeout);
       if (status !== 'OK' || !results.length) {
         setStatus(`Could not find location "${raw}". Try a different ZIP or city.`, true);
         document.getElementById('searchBtn').disabled = false;
