@@ -76,6 +76,27 @@
     .search-bar button:hover { background: #4338ca; }
     .search-bar button:disabled { background: #a5a3d8; cursor: not-allowed; }
 
+    .radius-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    .radius-control input[type="range"] {
+      width: 120px;
+      accent-color: #4f46e5;
+      cursor: pointer;
+    }
+
+    .radius-label {
+      min-width: 48px;
+      font-weight: 600;
+      color: #4f46e5;
+    }
+
     .status {
       padding: 12px 24px;
       font-size: 0.875rem;
@@ -224,6 +245,11 @@
 
 <div class="search-bar">
   <input id="locationInput" type="text" maxlength="100" placeholder="Enter ZIP code or city name (e.g. 10001 or Austin, TX)" />
+  <div class="radius-control">
+    <label for="radiusSlider">Radius</label>
+    <input id="radiusSlider" type="range" min="1" max="5" step="0.5" value="5" oninput="updateRadiusLabel()" />
+    <span id="radiusLabel" class="radius-label">5 mi</span>
+  </div>
   <button id="searchBtn" onclick="startSearch()">Search</button>
 </div>
 
@@ -235,8 +261,20 @@
   const WORKER = 'https://restuarant-finder-link.shivank-sharma.workers.dev/';
 
   const PRICE_LABELS = { 0: 'Free', 1: '$', 2: '$$', 3: '$$$', 4: '$$$$' };
-  const MIN_REVIEWS   = 1000;
-  const RADIUS_METERS = 8047; // 5 miles
+  const MIN_REVIEWS  = 1000;
+
+  function getRadiusMiles() {
+    return parseFloat(document.getElementById('radiusSlider').value);
+  }
+
+  function getRadiusMeters() {
+    return Math.round(getRadiusMiles() * 1609.34);
+  }
+
+  function updateRadiusLabel() {
+    const miles = getRadiusMiles();
+    document.getElementById('radiusLabel').textContent = miles + ' mi';
+  }
 
   function workerFetch(endpoint, params) {
     const paramStr = new URLSearchParams(params).toString();
@@ -288,7 +326,7 @@
     const allResults = [];
 
     function fetchPage(pageToken) {
-      const params = { location: `${location.lat},${location.lng}`, radius: RADIUS_METERS, type: 'restaurant' };
+      const params = { location: `${location.lat},${location.lng}`, radius: getRadiusMeters(), type: 'restaurant' };
       if (pageToken) params.pagetoken = pageToken;
 
       workerFetch('maps/api/place/nearbysearch/json', params)
@@ -405,7 +443,7 @@
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
-          No restaurants with 1,000+ reviews found within 5 miles.
+          No restaurants with 1,000+ reviews found within ${getRadiusMiles()} mile${getRadiusMiles() === 1 ? '' : 's'}.
           <br>Try a different location or city center.
         </div>`;
       return;
