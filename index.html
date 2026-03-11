@@ -12,8 +12,8 @@
 
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
-      background-color: #f0f0f7;
-      background-image: radial-gradient(circle, rgba(79, 70, 229, 0.13) 1px, transparent 1px);
+      background-color: #efefef;
+      background-image: radial-gradient(circle, rgba(110, 110, 110, 0.07) 1px, transparent 1px);
       background-size: 24px 24px;
       color: #1a1a1a;
       min-height: 100vh;
@@ -21,7 +21,7 @@
 
     /* ── Header ──────────────────────────────────────────── */
     header {
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      background: linear-gradient(135deg, #9c98e8 0%, #c0aef5 100%);
       padding: 36px 24px 30px;
       text-align: center;
     }
@@ -81,8 +81,8 @@
     }
 
     .search-bar input:focus {
-      border-color: #4f46e5;
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+      border-color: #9c98e8;
+      box-shadow: 0 0 0 3px rgba(156, 152, 232, 0.18);
     }
 
     .search-bar button {
@@ -90,21 +90,21 @@
       align-items: center;
       gap: 7px;
       padding: 10px 22px;
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
-      color: #fff;
+      background: linear-gradient(135deg, #9c98e8, #c0aef5);
+      color: #3a3770;
       border: none;
       border-radius: 999px;
       font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
-      box-shadow: 0 2px 10px rgba(79, 70, 229, 0.3);
+      box-shadow: 0 2px 10px rgba(156, 152, 232, 0.35);
       transition: opacity 0.15s, box-shadow 0.15s;
     }
 
     .search-bar button:hover {
       opacity: 0.91;
-      box-shadow: 0 4px 16px rgba(79, 70, 229, 0.38);
+      box-shadow: 0 4px 16px rgba(156, 152, 232, 0.42);
     }
 
     .search-bar button:disabled {
@@ -125,14 +125,14 @@
 
     .radius-control input[type="range"] {
       width: 110px;
-      accent-color: #4f46e5;
+      accent-color: #9c98e8;
       cursor: pointer;
     }
 
     .radius-label {
       min-width: 44px;
       font-weight: 700;
-      color: #4f46e5;
+      color: #7a78b8;
     }
 
     /* ── Status ──────────────────────────────────────────── */
@@ -148,13 +148,13 @@
       margin: 0 auto;
     }
 
-    .status.error { color: #dc2626; }
+    .status.error { color: #d97070; }
 
     .spinner {
       width: 16px;
       height: 16px;
       border: 2px solid #d0d0d0;
-      border-top-color: #4f46e5;
+      border-top-color: #9c98e8;
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
       flex-shrink: 0;
@@ -173,8 +173,8 @@
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      background: #ede9fe;
-      color: #4c1d95;
+      background: #ece8fc;
+      color: #6b52a8;
       border-radius: 999px;
       padding: 5px 14px;
       font-size: 0.78rem;
@@ -185,7 +185,7 @@
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: #7c3aed;
+      background: #c0aef5;
       flex-shrink: 0;
     }
 
@@ -286,10 +286,10 @@
       font-weight: 500;
     }
 
-    .tag-price   { background: #d1fae5; color: #065f46; }
-    .tag-cuisine { background: #ede9fe; color: #4c1d95; }
-    .tag-open    { background: #dcfce7; color: #166534; }
-    .tag-closed  { background: #fee2e2; color: #991b1b; }
+    .tag-price   { background: #d8f5e8; color: #2d6b50; }
+    .tag-cuisine { background: #e8e4fb; color: #6b52a8; }
+    .tag-open    { background: #d8f5e3; color: #2d6b47; }
+    .tag-closed  { background: #fce8e8; color: #9b4040; }
 
     .card-address {
       grid-column: 1;
