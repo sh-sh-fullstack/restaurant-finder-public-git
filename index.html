@@ -12,69 +12,107 @@
 
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
-      background: #f5f5f0;
+      background-color: #f0f0f7;
+      background-image: radial-gradient(circle, rgba(79, 70, 229, 0.13) 1px, transparent 1px);
+      background-size: 24px 24px;
       color: #1a1a1a;
       min-height: 100vh;
     }
 
+    /* ── Header ──────────────────────────────────────────── */
     header {
-      background: #fff;
-      border-bottom: 1px solid #e5e5e5;
-      padding: 20px 24px;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      padding: 36px 24px 30px;
+      text-align: center;
+    }
+
+    .header-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.15);
+      margin-bottom: 14px;
+      color: #fff;
     }
 
     header h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: -0.3px;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #fff;
     }
 
     header p {
-      font-size: 0.85rem;
-      color: #666;
-      margin-top: 3px;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.76);
+      margin-top: 7px;
     }
 
+    /* ── Search bar (sticky) ─────────────────────────────── */
     .search-bar {
-      background: #fff;
-      border-bottom: 1px solid #e5e5e5;
-      padding: 16px 24px;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      padding: 14px 24px;
       display: flex;
       gap: 10px;
       align-items: center;
       flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 14px rgba(0, 0, 0, 0.07);
     }
 
     .search-bar input {
       flex: 1;
       min-width: 200px;
-      padding: 10px 14px;
-      border: 1px solid #d0d0d0;
-      border-radius: 8px;
+      padding: 10px 20px;
+      border: 1.5px solid #d0d0d0;
+      border-radius: 999px;
       font-size: 0.95rem;
       outline: none;
-      transition: border-color 0.15s;
+      background: #fff;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
 
     .search-bar input:focus {
       border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
     }
 
     .search-bar button {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
       padding: 10px 22px;
-      background: #4f46e5;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
       color: #fff;
       border: none;
-      border-radius: 8px;
+      border-radius: 999px;
       font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.15s;
       white-space: nowrap;
+      box-shadow: 0 2px 10px rgba(79, 70, 229, 0.3);
+      transition: opacity 0.15s, box-shadow 0.15s;
     }
 
-    .search-bar button:hover { background: #4338ca; }
-    .search-bar button:disabled { background: #a5a3d8; cursor: not-allowed; }
+    .search-bar button:hover {
+      opacity: 0.91;
+      box-shadow: 0 4px 16px rgba(79, 70, 229, 0.38);
+    }
+
+    .search-bar button:disabled {
+      background: linear-gradient(135deg, #a5a3d8, #b8a8e8);
+      cursor: not-allowed;
+      box-shadow: none;
+      opacity: 1;
+    }
 
     .radius-control {
       display: flex;
@@ -86,17 +124,18 @@
     }
 
     .radius-control input[type="range"] {
-      width: 120px;
+      width: 110px;
       accent-color: #4f46e5;
       cursor: pointer;
     }
 
     .radius-label {
-      min-width: 48px;
-      font-weight: 600;
+      min-width: 44px;
+      font-weight: 700;
       color: #4f46e5;
     }
 
+    /* ── Status ──────────────────────────────────────────── */
     .status {
       padding: 12px 24px;
       font-size: 0.875rem;
@@ -105,12 +144,15 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      max-width: 880px;
+      margin: 0 auto;
     }
 
     .status.error { color: #dc2626; }
 
     .spinner {
-      width: 16px; height: 16px;
+      width: 16px;
+      height: 16px;
       border: 2px solid #d0d0d0;
       border-top-color: #4f46e5;
       border-radius: 50%;
@@ -120,58 +162,112 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── Results meta ────────────────────────────────────── */
     .results-meta {
-      padding: 4px 24px 12px;
-      font-size: 0.8rem;
-      color: #888;
+      padding: 4px 24px 14px;
+      max-width: 880px;
+      margin: 0 auto;
     }
 
+    .results-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: #ede9fe;
+      color: #4c1d95;
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .results-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #7c3aed;
+      flex-shrink: 0;
+    }
+
+    /* ── Results grid ────────────────────────────────────── */
     .results {
-      padding: 0 24px 40px;
+      padding: 0 24px 52px;
       display: grid;
       gap: 14px;
-      max-width: 900px;
+      max-width: 880px;
+      margin: 0 auto;
     }
 
+    /* ── Card ────────────────────────────────────────────── */
     .card {
       background: #fff;
-      border: 1px solid #e8e8e8;
-      border-radius: 12px;
+      border: 1px solid rgba(0, 0, 0, 0.07);
+      border-radius: 14px;
       padding: 18px 20px;
       display: grid;
       grid-template-columns: 1fr auto;
-      gap: 6px 16px;
-      transition: box-shadow 0.15s;
+      gap: 6px 20px;
+      transition: box-shadow 0.18s, transform 0.18s;
     }
 
-    .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .card:hover {
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
 
     .card-name {
       font-size: 1.05rem;
       font-weight: 700;
       color: #111;
       grid-column: 1;
+      align-self: center;
     }
 
+    /* Rating block: outer column, spans all rows */
     .card-rating-block {
       grid-column: 2;
-      grid-row: 1 / 3;
+      grid-row: 1 / 4;
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
-      gap: 4px;
-      white-space: nowrap;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      align-self: center;
+      flex-shrink: 0;
     }
 
-    .stars {
-      font-size: 0.95rem;
-      color: #f59e0b;
-      letter-spacing: 1px;
+    /* Amber circular badge */
+    .rating-badge {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: linear-gradient(150deg, #fef3c7, #fde68a);
+      border: 2px solid rgba(245, 158, 11, 0.35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .rating-score {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #78350f;
+      line-height: 1;
+    }
+
+    .stars-row {
+      display: flex;
+      gap: 1px;
+      margin-top: 3px;
     }
 
     .review-count {
-      font-size: 0.78rem;
-      color: #777;
+      font-size: 0.68rem;
+      color: #999;
+      text-align: center;
+      white-space: nowrap;
+      line-height: 1.35;
     }
 
     .card-meta {
@@ -179,83 +275,121 @@
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
     .tag {
       display: inline-block;
-      padding: 2px 8px;
+      padding: 2px 9px;
       border-radius: 999px;
       font-size: 0.75rem;
       font-weight: 500;
     }
 
-    .tag-price {
-      background: #d1fae5;
-      color: #065f46;
-    }
-
-    .tag-cuisine {
-      background: #ede9fe;
-      color: #4c1d95;
-    }
-
-    .tag-open {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .tag-closed {
-      background: #fee2e2;
-      color: #991b1b;
-    }
+    .tag-price   { background: #d1fae5; color: #065f46; }
+    .tag-cuisine { background: #ede9fe; color: #4c1d95; }
+    .tag-open    { background: #dcfce7; color: #166534; }
+    .tag-closed  { background: #fee2e2; color: #991b1b; }
 
     .card-address {
-      grid-column: 1 / -1;
+      grid-column: 1;
       font-size: 0.8rem;
-      color: #777;
-      margin-top: 4px;
+      color: #888;
+      margin-top: 2px;
     }
 
+    /* ── Empty state ─────────────────────────────────────── */
     .empty-state {
       padding: 60px 24px;
       text-align: center;
       color: #aaa;
       font-size: 0.95rem;
+      max-width: 880px;
+      margin: 0 auto;
     }
 
     .empty-state svg {
       display: block;
-      margin: 0 auto 16px;
-      opacity: 0.35;
+      margin: 0 auto 20px;
+      opacity: 0.38;
     }
 
+    .empty-state strong {
+      display: block;
+      font-size: 1.05rem;
+      color: #888;
+      margin-bottom: 6px;
+    }
+
+    /* ── Responsive ──────────────────────────────────────── */
     @media (max-width: 520px) {
       .card { grid-template-columns: 1fr; }
-      .card-rating-block { grid-row: unset; align-items: flex-start; flex-direction: row; gap: 8px; }
+
+      .card-rating-block {
+        grid-row: unset;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 12px;
+      }
+
+      .rating-badge {
+        width: 50px;
+        height: 50px;
+      }
+
+      .rating-score { font-size: 1rem; }
     }
   </style>
 </head>
 <body>
 
+<!-- Shared SVG defs: half-star gradient, referenced by all star SVGs -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none;" aria-hidden="true">
+  <defs>
+    <linearGradient id="starHalfGrad" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="50%" stop-color="#d1d5db"/>
+    </linearGradient>
+  </defs>
+</svg>
+
 <header>
+  <div class="header-icon" aria-hidden="true">
+    <!-- Fork and knife icon (inline SVG, no external source) -->
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+      <path d="M7 2v20"/>
+      <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>
+    </svg>
+  </div>
   <h1>Restaurant Finder</h1>
   <p>Find highly-reviewed restaurants near any ZIP code or city</p>
 </header>
 
 <div class="search-bar">
-  <input id="locationInput" type="text" maxlength="100" placeholder="Enter ZIP code or city name (e.g. 10001 or Austin, TX)" />
+  <input id="locationInput" type="text" maxlength="100"
+         placeholder="Enter ZIP code or city name (e.g. 10001 or Austin, TX)"
+         data-testid="location-input" />
   <div class="radius-control">
     <label for="radiusSlider">Radius</label>
-    <input id="radiusSlider" type="range" min="1" max="5" step="0.5" value="5" oninput="updateRadiusLabel()" />
-    <span id="radiusLabel" class="radius-label">5 mi</span>
+    <input id="radiusSlider" type="range" min="1" max="5" step="0.5" value="5"
+           oninput="updateRadiusLabel()" data-testid="radius-slider" />
+    <span id="radiusLabel" class="radius-label" data-testid="radius-label">5 mi</span>
   </div>
-  <button id="searchBtn" onclick="startSearch()">Search</button>
+  <button id="searchBtn" onclick="startSearch()" data-testid="search-button">
+    <!-- Inline SVG search icon -->
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    Search
+  </button>
 </div>
 
-<div id="status" class="status"></div>
-<div id="resultsMeta" class="results-meta"></div>
-<div id="results" class="results"></div>
+<div id="status" class="status" data-testid="status"></div>
+<div id="resultsMeta" class="results-meta" data-testid="results-meta"></div>
+<div id="results" class="results" data-testid="results"></div>
 
 <script>
   const WORKER = 'https://restuarant-finder-link.shivank-sharma.workers.dev/';
@@ -302,7 +436,7 @@
     if (!raw) { setStatus('Please enter a ZIP code or city name.', true); return; }
 
     document.getElementById('results').innerHTML = '';
-    document.getElementById('resultsMeta').textContent = '';
+    document.getElementById('resultsMeta').innerHTML = '';
     setStatus('Geocoding location...', false, true);
     document.getElementById('searchBtn').disabled = true;
 
@@ -356,11 +490,16 @@
     fetchPage(null);
   }
 
+  // Inline SVG stars — reference shared gradient in <defs> above for half star
+  const STAR_FULL  = '<svg width="11" height="11" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#f59e0b"/></svg>';
+  const STAR_HALF  = '<svg width="11" height="11" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="url(#starHalfGrad)"/></svg>';
+  const STAR_EMPTY = '<svg width="11" height="11" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#d1d5db"/></svg>';
+
   function starsHtml(rating) {
     const full  = Math.floor(rating);
     const half  = rating - full >= 0.5 ? 1 : 0;
     const empty = 5 - full - half;
-    return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+    return STAR_FULL.repeat(full) + (half ? STAR_HALF : '') + STAR_EMPTY.repeat(empty);
   }
 
   // Keyword → cuisine, matched against lowercased restaurant name
@@ -437,12 +576,27 @@
 
     if (!filtered.length) {
       setStatus('');
-      document.getElementById('resultsMeta').textContent = '';
+      document.getElementById('resultsMeta').innerHTML = '';
       document.getElementById('results').innerHTML = `
         <div class="empty-state">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          <svg width="88" height="88" viewBox="0 0 88 88" fill="none" stroke="currentColor"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <!-- Plate outer ring -->
+            <circle cx="34" cy="50" r="22" stroke-width="2.5"/>
+            <!-- Plate inner ring -->
+            <circle cx="34" cy="50" r="13" stroke-width="1.5"/>
+            <!-- Fork (left of plate) -->
+            <line x1="10" y1="26" x2="10" y2="36" stroke-width="2.5"/>
+            <line x1="7"  y1="26" x2="7"  y2="32" stroke-width="1.5"/>
+            <line x1="13" y1="26" x2="13" y2="32" stroke-width="1.5"/>
+            <line x1="10" y1="36" x2="10" y2="48" stroke-width="2.5"/>
+            <!-- Knife (right of plate) -->
+            <path d="M58 26 C58 26 62 30 62 36 L60 42 L60 52" stroke-width="2.5"/>
+            <!-- Magnifying glass -->
+            <circle cx="60" cy="28" r="16" stroke-width="3"/>
+            <line x1="72" y1="40" x2="82" y2="50" stroke-width="3.5"/>
           </svg>
+          <strong>No results found</strong>
           No restaurants with 1,000+ reviews found within ${getRadiusMiles()} mile${getRadiusMiles() === 1 ? '' : 's'}.
           <br>Try a different location or city center.
         </div>`;
@@ -450,10 +604,11 @@
     }
 
     setStatus('');
-    document.getElementById('resultsMeta').textContent =
-      `Showing ${filtered.length} restaurant${filtered.length !== 1 ? 's' : ''} with 1,000+ reviews — sorted by review count`;
+    const count = filtered.length;
+    document.getElementById('resultsMeta').innerHTML =
+      `<div class="results-badge"><span class="results-badge-dot"></span>${count} restaurant${count !== 1 ? 's' : ''} with 1,000+ reviews &mdash; sorted by review count</div>`;
 
-    const html = filtered.map(place => {
+    const html = filtered.map((place, index) => {
       const cuisine = getCuisine(place);
       const price   = PRICE_LABELS[place.price_level];
       const open    = place.opening_hours?.open_now;
@@ -463,12 +618,19 @@
           ? `<span class="tag tag-closed">Closed</span>`
           : '';
 
+      // Numeric values: safe from XSS — toFixed/toLocaleString return digit strings only
+      const ratingFixed      = place.rating.toFixed(1);
+      const reviewsFormatted = place.user_ratings_total.toLocaleString();
+
       return `
-        <div class="card">
+        <div class="card" data-testid="restaurant-card" data-card-index="${index}">
           <div class="card-name">${escHtml(place.name)}</div>
-          <div class="card-rating-block">
-            <div class="stars">${starsHtml(place.rating)}</div>
-            <div class="review-count">${place.rating.toFixed(1)} · ${place.user_ratings_total.toLocaleString()} reviews</div>
+          <div class="card-rating-block" aria-label="${ratingFixed} out of 5, ${reviewsFormatted} reviews">
+            <div class="rating-badge">
+              <div class="rating-score">${ratingFixed}</div>
+              <div class="stars-row" aria-hidden="true">${starsHtml(place.rating)}</div>
+            </div>
+            <div class="review-count">${reviewsFormatted}<br>reviews</div>
           </div>
           <div class="card-meta">
             ${price   ? `<span class="tag tag-price">${escHtml(price)}</span>` : ''}
@@ -491,7 +653,6 @@
     if (e.key === 'Enter') startSearch();
   });
 </script>
-
 
 </body>
 </html>
