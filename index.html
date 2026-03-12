@@ -458,8 +458,11 @@
     const allResults = [];
 
     function fetchPage(pageToken) {
-      const params = { location: `${location.lat},${location.lng}`, radius: getRadiusMeters(), type: 'restaurant' };
-      if (pageToken) params.pagetoken = pageToken;
+      // On paginated requests send only pagetoken; Google ignores other params
+      // when pagetoken is present and some proxies reject the extra fields.
+      const params = pageToken
+        ? { pagetoken: pageToken }
+        : { location: `${location.lat},${location.lng}`, radius: getRadiusMeters(), type: 'restaurant' };
 
       workerFetch('maps/api/place/nearbysearch/json', params)
         .then(data => {
@@ -472,16 +475,30 @@
               renderResults(allResults);
             }
           } else if (data.status === 'ZERO_RESULTS') {
-            setStatus('No restaurants found near that location.');
-            document.getElementById('searchBtn').disabled = false;
+            // May happen on a subsequent page; show whatever we already have
+            if (allResults.length) {
+              renderResults(allResults);
+            } else {
+              setStatus('No restaurants found near that location.');
+              document.getElementById('searchBtn').disabled = false;
+            }
           } else {
-            setStatus(`Places API error: ${data.status}`, true);
-            document.getElementById('searchBtn').disabled = false;
+            // On a mid-pagination error, render whatever was already fetched
+            if (allResults.length) {
+              renderResults(allResults);
+            } else {
+              setStatus(`Places API error: ${data.status}`, true);
+              document.getElementById('searchBtn').disabled = false;
+            }
           }
         })
         .catch(() => {
-          setStatus('Could not reach the search service. Please check your network connection.', true);
-          document.getElementById('searchBtn').disabled = false;
+          if (allResults.length) {
+            renderResults(allResults);
+          } else {
+            setStatus('Could not reach the search service. Please check your network connection.', true);
+            document.getElementById('searchBtn').disabled = false;
+          }
         });
     }
 
