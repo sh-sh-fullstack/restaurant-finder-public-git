@@ -179,23 +179,25 @@ describe('CORS headers', () => {
 // ---------------------------------------------------------------------------
 
 describe('Origin validation', () => {
-  it('does not block requests by origin — CORS is enforced browser-side only', async () => {
-    // The worker sets Access-Control-Allow-Origin on responses but does NOT
-    // inspect the incoming Origin header to gate access. Browsers use the
-    // CORS response headers to decide whether JS can read the response;
-    // the worker itself responds to all callers regardless of origin.
+  it('blocks requests from wrong origin', async () => {
     const response = await makeRequest(
-      'maps/api/place/nearbysearch/json',
-      'location=40.7,-74.0&radius=1000',
+      'maps/api/geocode/json',
+      'address=New+York',
       'GET',
       'https://evil-site.com'
     );
-    expect(response.status).toBe(200);
-    // The CORS header still names only the allowed origin — browsers will
-    // block the evil-site.com JS from reading this response.
-    expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+    expect(response.status).toBe(403);
+    expect(await response.text()).toContain('Forbidden');
+  });
+
+  it('allows requests from correct origin', async () => {
+    const response = await makeRequest(
+      'maps/api/geocode/json',
+      'address=New+York',
+      'GET',
       'https://sh-sh-fullstack.github.io'
     );
+    expect(response.status).toBe(200);
   });
 });
 

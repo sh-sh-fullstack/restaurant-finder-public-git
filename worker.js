@@ -66,6 +66,33 @@ export default {
       })
     );
 
+    // Origin validation (balanced approach - logs missing origins, blocks wrong ones)
+    const origin = request.headers.get('Origin');
+
+    // Log requests without origin header (curl, Postman, etc.)
+    if (!origin) {
+      console.log('[warning] Request without Origin header', {
+        ip: clientIP,
+        method: request.method,
+      });
+      // Allow to continue - these are typically testing tools
+    }
+
+    // Block requests from wrong origins (malicious browser-based attacks)
+    if (origin && origin !== ALLOWED_ORIGIN) {
+      console.log('[blocked] Invalid origin', {
+        ip: clientIP,
+        origin,
+        allowed: ALLOWED_ORIGIN,
+      });
+      return new Response('Forbidden - Invalid Origin', {
+        status: 403,
+        headers: {
+          'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+        },
+      });
+    }
+
     // Handle CORS preflight
     if (request.method === 'OPTIONS') {
       return new Response(null, {
@@ -111,7 +138,7 @@ export default {
     }
     
     const googleUrl = `https://maps.googleapis.com/${endpoint}?${cleanParams}&key=${env.GOOGLE_API_KEY}`;
-    console.log('[request]', { ip: clientIP, endpoint, cleanParams });
+    console.log('[request]', { ip: clientIP, origin: origin || 'none', endpoint, cleanParams });
     const response = await fetch(googleUrl);
     const data = await response.json();
     console.log('[google]', { status: data.status, results: data.results?.length ?? 0 });
