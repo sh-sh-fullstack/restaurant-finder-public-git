@@ -139,14 +139,27 @@ export default {
     
     const googleUrl = `https://maps.googleapis.com/${endpoint}?${cleanParams}&key=${env.GOOGLE_API_KEY}`;
     console.log('[request]', { ip: clientIP, origin: origin || 'none', endpoint, cleanParams });
-    const response = await fetch(googleUrl);
-    const data = await response.json();
+
+    let data;
+    try {
+      const googleResponse = await fetch(googleUrl);
+      data = await googleResponse.json();
+    } catch (err) {
+      console.log('[error] Google API request failed', { ip: clientIP, endpoint, error: err.message });
+      return new Response('Service unavailable', {
+        status: 502,
+        headers: {
+          'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+        },
+      });
+    }
+
     console.log('[google]', { status: data.status, results: data.results?.length ?? 0 });
     return new Response(JSON.stringify(data), {
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-  },
-});
+      },
+    });
   },
 };
