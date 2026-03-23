@@ -44,9 +44,28 @@ export default {
   async fetch(request, env, ctx) {
     // Rate limiting using Cloudflare's CF-Connecting-IP header
     const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
+
+    // Config validation — fail fast before any external calls
+    if (!env.GOOGLE_API_KEY) {
+      console.log('[error] Missing GOOGLE_API_KEY binding', { ip: clientIP });
+      return new Response(JSON.stringify({ status: 'ERROR', error_message: 'Service temporarily unavailable' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': ALLOWED_ORIGIN },
+      });
+    }
+
     const rateLimitKey = `rate_limit:${clientIP}`;
 
-    const currentCount = await env.RATE_LIMITER.get(rateLimitKey);
+    let currentCount;
+    try {
+      currentCount = await env.RATE_LIMITER.get(rateLimitKey);
+    } catch (err) {
+      console.log('[error] RATE_LIMITER unavailable', { ip: clientIP, error: err.message });
+      return new Response(JSON.stringify({ status: 'ERROR', error_message: 'Service temporarily unavailable' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': ALLOWED_ORIGIN },
+      });
+    }
 
     if (currentCount && parseInt(currentCount) >= RATE_LIMIT_REQUESTS) {
       return new Response('Too many requests', {
@@ -63,7 +82,7 @@ export default {
     ctx.waitUntil(
       env.RATE_LIMITER.put(rateLimitKey, newCount.toString(), {
         expirationTtl: RATE_LIMIT_WINDOW,
-      })
+      }).catch(err => console.log('[error] RATE_LIMITER put failed', { ip: clientIP, error: err.message }))
     );
 
     // Origin validation (balanced approach - logs missing origins, blocks wrong ones)

@@ -49,7 +49,7 @@ async function makeRequest(endpoint, params, method = 'GET', origin = null) {
 
   const request = new Request(url, { method, headers });
   const ctx = createExecutionContext();
-  const response = await worker.fetch(request, env, ctx);
+  const response = await worker.fetch(request, { ...env, GOOGLE_API_KEY: 'test-key-12345' }, ctx);
   await waitOnExecutionContext(ctx);
 
   return response;
