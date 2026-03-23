@@ -145,10 +145,36 @@ export default {
       const googleResponse = await fetch(googleUrl);
       data = await googleResponse.json();
     } catch (err) {
-      console.log('[error] Google API request failed', { ip: clientIP, endpoint, error: err.message });
-      return new Response('Service unavailable', {
-        status: 502,
+      console.log('[error] Google API request failed', {
+        ip: clientIP,
+        endpoint,
+        error: err.message,
+        timestamp: new Date().toISOString(),
+      });
+
+      let errorMessage = 'Service unavailable';
+      let statusCode = 502;
+
+      if (err.message.includes('timeout') || err.message.includes('time')) {
+        errorMessage = 'Google Maps is taking too long to respond. Please try again.';
+        statusCode = 504;
+
+      } else if (err.message.includes('JSON') || err.message.includes('parse') || err.message.includes('Unexpected')) {
+        errorMessage = 'Received invalid data from Google Maps. Please try again.';
+        statusCode = 502;
+
+      } else if (err.message.includes('network') || err.message.includes('fetch') || err.message.includes('unreachable')) {
+        errorMessage = 'Cannot reach Google Maps. Check your internet connection.';
+        statusCode = 503;
+      }
+
+      return new Response(JSON.stringify({
+        status: 'ERROR',
+        error_message: errorMessage,
+      }), {
+        status: statusCode,
         headers: {
+          'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
         },
       });
