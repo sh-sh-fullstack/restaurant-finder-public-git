@@ -17,7 +17,7 @@ export default defineConfig({
   test: {
     // jsdom simulates browser globals: document, window, localStorage, etc.
     environment: 'jsdom',
-    include: ['**/*.frontend.test.js', '**/*.integration.test.js'],
+    include: ['**/*.frontend.test.js', '**/*.integration.test.js', '**/index.unit.test.js'],
     exclude: ['**/node_modules/**'],
   },
 });
