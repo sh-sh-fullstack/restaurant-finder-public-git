@@ -5,7 +5,8 @@ export default defineWorkersConfig({
     // Exclude frontend tests — they require jsdom (browser DOM) which is
     // incompatible with the Cloudflare Workers V8 isolate environment.
     // Frontend tests are run separately via vitest.config.frontend.js.
-    exclude: ['**/*.frontend.test.js', '**/*.integration.test.js', '**/index.unit.test.js', '**/index.security.test.js', '**/node_modules/**'],
+    // Phase 2.59: removed *.frontend.test.js from exclude — file deleted as redundant.
+    exclude: ['**/*.integration.test.js', '**/index.unit.test.js', '**/index.security.test.js', '**/node_modules/**'],
     poolOptions: {
       workers: {
         wrangler: {

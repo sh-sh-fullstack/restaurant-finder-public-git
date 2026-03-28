@@ -7,7 +7,10 @@
  * - Frontend tests need a real browser-like DOM (jsdom provides this)
  * - Mixing the two environments causes test failures in both directions
  *
- * Pattern: *.frontend.test.js
+ * Phase 2.59: removed *.frontend.test.js pattern — index.frontend.test.js
+ * (jsdom smoke tests) was deleted as redundant once the real integration,
+ * unit, and security suites proved the jsdom environment works correctly.
+ *
  * Run: npm run test:frontend
  */
 
@@ -17,7 +20,7 @@ export default defineConfig({
   test: {
     // jsdom simulates browser globals: document, window, localStorage, etc.
     environment: 'jsdom',
-    include: ['**/*.frontend.test.js', '**/*.integration.test.js', '**/index.unit.test.js', '**/index.security.test.js'],
+    include: ['**/*.integration.test.js', '**/index.unit.test.js', '**/index.security.test.js'],
     exclude: ['**/node_modules/**'],
   },
 });
