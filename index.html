@@ -47,6 +47,9 @@
       font-size: 0.9rem;
       color: #000;
       margin-top: 7px;
+      max-width: 540px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     /* ── Search bar (sticky) ─────────────────────────────── */
@@ -66,9 +69,9 @@
       box-shadow: 0 2px 14px rgba(0, 0, 0, 0.07);
     }
 
-    .search-bar input {
-      flex: 1;
-      min-width: 200px;
+    .search-bar input[type="text"] {
+      flex: 1 1 140px;
+      min-width: 140px;
       padding: 10px 20px;
       border: 1.5px solid #d0d0d0;
       border-radius: 999px;
@@ -78,7 +81,7 @@
       transition: border-color 0.15s, box-shadow 0.15s;
     }
 
-    .search-bar input:focus {
+    .search-bar input[type="text"]:focus {
       border-color: #9b97e8;
       box-shadow: 0 0 0 3px rgba(155, 151, 232, 0.18);
     }
@@ -112,6 +115,23 @@
       opacity: 1;
     }
 
+    /* Cuisine trigger overrides .search-bar button — higher specificity wins */
+    .search-bar .cuisine-trigger {
+      background: #fff;
+      color: #333;
+      border: 1.5px solid #d0d0d0;
+      box-shadow: none;
+      font-weight: 500;
+      font-size: 0.85rem;
+      padding: 8px 14px;
+    }
+
+    .search-bar .cuisine-trigger:hover {
+      background: #f5f3ff;
+      opacity: 1;
+      box-shadow: none;
+    }
+
     .radius-control {
       display: flex;
       align-items: center;
@@ -131,6 +151,109 @@
       min-width: 44px;
       font-weight: 700;
       color: #000;
+    }
+
+    /* ── Open Now toggle ─────────────────────────────────── */
+    .toggle-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.85rem;
+      color: #000;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Visually hidden but still in tab order via the label */
+    .toggle-wrap input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    .toggle-track {
+      width: 36px;
+      height: 20px;
+      border-radius: 10px;
+      background: #d0d0d0;
+      position: relative;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .toggle-wrap input[type="checkbox"]:checked + .toggle-track {
+      background: #8480d4;
+    }
+
+    .toggle-thumb {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      transition: left 0.2s;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .toggle-wrap input[type="checkbox"]:checked + .toggle-track .toggle-thumb {
+      left: 18px;
+    }
+
+    /* ── Cuisine filter row ───────────────────────────────── */
+    .filter-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-top: 4px;
+    }
+
+    .cuisine-wrap {
+      position: relative;
+    }
+
+    .cuisine-panel {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      background: #fff;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      padding: 8px;
+      z-index: 200;
+      min-width: 180px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .cuisine-panel.open {
+      display: block;
+    }
+
+    .cuisine-option {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .cuisine-option:hover {
+      background: #f5f3ff;
+    }
+
+    .cuisine-option input[type="checkbox"] {
+      accent-color: #8480d4;
+      cursor: pointer;
     }
 
     /* ── Status ──────────────────────────────────────────── */
@@ -296,6 +419,27 @@
       margin-top: 2px;
     }
 
+    /* ── Open Hours Unknown divider ──────────────────────── */
+    .unknown-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #888;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 4px 0;
+    }
+
+    .unknown-divider::before,
+    .unknown-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e0e0e0;
+    }
+
     /* ── Empty state ─────────────────────────────────────── */
     .empty-state {
       padding: 60px 24px;
@@ -362,13 +506,18 @@
     </svg>
   </div>
   <h1>Proven</h1>
-  <p>Find local restaurants with more than 1000 review</p>
+  <p>Find restaurants with more than a 1000 reviews. These represent the most visited and time tested places where the community comes together</p>
 </header>
 
 <div class="search-bar">
   <input id="locationInput" type="text" maxlength="100"
          placeholder="Enter ZIP code or city name (e.g. 10001 or Austin, TX)"
          data-testid="location-input" />
+  <label class="toggle-wrap" data-testid="open-now-toggle">
+    <input type="checkbox" id="openNowToggle" onchange="onOpenNowChange()" />
+    <span class="toggle-track"><span class="toggle-thumb"></span></span>
+    Open Now
+  </label>
   <div class="radius-control">
     <label for="radiusSlider">Radius</label>
     <input id="radiusSlider" type="range" min="1" max="5" step="0.5" value="5"
@@ -383,6 +532,13 @@
     </svg>
     Search
   </button>
+  <!-- Cuisine filter row — hidden until results load, shown by populateCuisineDropdown() -->
+  <div class="filter-row" id="filterRow" style="display:none">
+    <div class="cuisine-wrap" id="cuisineWrap">
+      <button class="cuisine-trigger" id="cuisineTrigger" onclick="toggleCuisinePanel()">All cuisines &#x25be;</button>
+      <div class="cuisine-panel" id="cuisinePanel" role="listbox" aria-multiselectable="true"></div>
+    </div>
+  </div>
 </div>
 
 <div id="status" class="status" data-testid="status"></div>
@@ -394,6 +550,10 @@
 
   const PRICE_LABELS = { 0: 'Free', 1: '$', 2: '$$', 3: '$$$', 4: '$$$$' };
   const MIN_REVIEWS  = 1000;
+
+  // Filter state — module-level so selections persist across searches
+  let baseResults      = []; // 1000+-qualified places, Bayesian-ranked; populated once per search
+  let selectedCuisines = new Set(); // empty Set = no filter (all cuisines shown)
 
   function getRadiusMiles() {
     return parseFloat(document.getElementById('radiusSlider').value);
@@ -582,16 +742,26 @@
     return 'Restaurant';
   }
 
-  function renderResults(all) {
-    const filtered = all
-      .filter(p => p.user_ratings_total >= MIN_REVIEWS && p.rating)
-      .sort((a, b) => b.user_ratings_total - a.user_ratings_total);
+  // Bayesian rating formula: score = (C * m + R * v) / (m + v)
+  // C = mean rating of all qualified results in this search (the global prior)
+  // m = 1000 = prior weight — treats every place as though it has 1000 average-rated reviews to start;
+  //            places with few real reviews are pulled toward the mean, reducing flukes
+  // R = this place's actual rating
+  // v = this place's review count
+  function bayesianScore(C, m, R, v) {
+    return (C * m + R * v) / (m + v);
+  }
 
+  function renderResults(all) {
     document.getElementById('searchBtn').disabled = false;
 
-    if (!filtered.length) {
+    const qualified = all.filter(p => p.user_ratings_total >= MIN_REVIEWS && p.rating);
+
+    if (!qualified.length) {
+      baseResults = [];
       setStatus('');
       document.getElementById('resultsMeta').innerHTML = '';
+      document.getElementById('filterRow').style.display = 'none';
       document.getElementById('results').innerHTML = `
         <div class="empty-state">
           <svg width="88" height="88" viewBox="0 0 88 88" fill="none" stroke="currentColor"
@@ -618,45 +788,190 @@
       return;
     }
 
-    setStatus('');
-    const count = filtered.length;
-    document.getElementById('resultsMeta').innerHTML =
-      `<div class="results-badge"><span class="results-badge-dot"></span>${count} restaurant${count !== 1 ? 's' : ''} with 1,000+ reviews &mdash; sorted by review count</div>`;
+    // Compute Bayesian scores once per result set; C is the mean of this specific result set
+    const m = 1000;
+    const C = qualified.reduce((s, p) => s + p.rating, 0) / qualified.length;
+    baseResults = qualified
+      .map(p => Object.assign({}, p, { _score: bayesianScore(C, m, p.rating, p.user_ratings_total) }))
+      .sort((a, b) => b._score - a._score);
 
-    const html = filtered.map((place, index) => {
+    // Derive cuisine options once from baseResults, before any filtering
+    const cuisineSet = new Set(baseResults.map(getCuisine));
+    populateCuisineDropdown(cuisineSet);
+
+    applyFilters();
+  }
+
+  // Build cuisine checkboxes; preserve prior selection where cuisines still exist in new results
+  function populateCuisineDropdown(cuisines) {
+    const panel = document.getElementById('cuisinePanel');
+    while (panel.firstChild) panel.removeChild(panel.firstChild);
+
+    Array.from(cuisines).sort().forEach(cuisine => {
+      const lbl = document.createElement('label');
+      lbl.className = 'cuisine-option';
+
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = cuisine;
+      // selectedCuisines empty = all shown; otherwise check only previously selected cuisines
+      cb.checked = selectedCuisines.size === 0 || selectedCuisines.has(cuisine);
+      cb.addEventListener('change', onCuisineChange);
+
+      lbl.appendChild(cb);
+      lbl.appendChild(document.createTextNode('\u00a0' + cuisine));
+      panel.appendChild(lbl);
+    });
+
+    document.getElementById('filterRow').style.display = '';
+    updateCuisineTriggerLabel();
+  }
+
+  function updateCuisineTriggerLabel() {
+    const btn = document.getElementById('cuisineTrigger');
+    if (!btn) return;
+    if (selectedCuisines.size === 0) {
+      btn.textContent = 'All cuisines \u25be';
+    } else {
+      const names = Array.from(selectedCuisines).sort();
+      const label = names.length <= 2
+        ? names.join(', ')
+        : names[0] + ' +' + (names.length - 1) + ' more';
+      btn.textContent = label + ' \u25be';
+    }
+  }
+
+  function toggleCuisinePanel() {
+    document.getElementById('cuisinePanel').classList.toggle('open');
+  }
+
+  function onCuisineChange() {
+    const checkboxes = Array.from(document.querySelectorAll('#cuisinePanel input[type="checkbox"]'));
+    const checked = checkboxes.filter(cb => cb.checked).map(cb => cb.value);
+    // All checked → empty set sentinel (no filter); some checked → filter to those
+    selectedCuisines = checked.length === checkboxes.length ? new Set() : new Set(checked);
+    updateCuisineTriggerLabel();
+    applyFilters();
+  }
+
+  function onOpenNowChange() {
+    applyFilters();
+  }
+
+  // Single shared function for all filter combinations (cuisine + Open Now)
+  function applyFilters() {
+    if (!baseResults.length) return;
+
+    const openNowOn = document.getElementById('openNowToggle').checked;
+
+    // Step 1: apply cuisine filter
+    const cuisineVisible = selectedCuisines.size === 0
+      ? baseResults
+      : baseResults.filter(p => selectedCuisines.has(getCuisine(p)));
+
+    // Step 2: cuisine filter produces no results
+    if (!cuisineVisible.length) {
+      setStatus('');
+      document.getElementById('resultsMeta').innerHTML = '';
+      const resultsEl = document.getElementById('results');
+      resultsEl.innerHTML = '';
+      const msg = document.createElement('div');
+      msg.className = 'empty-state';
+      const strong = document.createElement('strong');
+      strong.appendChild(document.createTextNode('Cuisine selection is too restrictive to show results'));
+      msg.appendChild(strong);
+      resultsEl.appendChild(msg);
+      return;
+    }
+
+    // Step 3: apply Open Now filter — split into known-open and unknown; hide closed
+    let primary, unknown;
+    if (openNowOn) {
+      primary = cuisineVisible.filter(p => p.opening_hours?.open_now === true);
+      unknown = cuisineVisible.filter(p => p.opening_hours?.open_now === undefined);
+      // open_now === false → omitted entirely
+    } else {
+      primary = cuisineVisible;
+      unknown = null;
+    }
+
+    const totalVisible = primary.length + (unknown ? unknown.length : 0);
+
+    // Step 4: update results badge
+    setStatus('');
+    const metaEl = document.getElementById('resultsMeta');
+    metaEl.innerHTML = '';
+    const badge = document.createElement('div');
+    badge.className = 'results-badge';
+    const dot = document.createElement('span');
+    dot.className = 'results-badge-dot';
+    badge.appendChild(dot);
+    badge.appendChild(document.createTextNode(
+      totalVisible + ' restaurant' + (totalVisible !== 1 ? 's' : '') +
+      ' with 1,000+ reviews \u2014 Ranked by rating and review count'
+    ));
+    metaEl.appendChild(badge);
+
+    // Step 5: render cards
+    const resultsEl = document.getElementById('results');
+    resultsEl.innerHTML = '';
+
+    if (!totalVisible) {
+      const msg = document.createElement('div');
+      msg.className = 'empty-state';
+      const strong = document.createElement('strong');
+      strong.appendChild(document.createTextNode('No open restaurants match the current filters.'));
+      msg.appendChild(strong);
+      resultsEl.appendChild(msg);
+      return;
+    }
+
+    renderCardList(primary, resultsEl);
+
+    if (unknown && unknown.length) {
+      const divider = document.createElement('div');
+      divider.className = 'unknown-divider';
+      divider.appendChild(document.createTextNode('Open Hours Unknown'));
+      resultsEl.appendChild(divider);
+      renderCardList(unknown, resultsEl);
+    }
+  }
+
+  function renderCardList(places, container) {
+    places.forEach(place => {
       const cuisine = getCuisine(place);
       const price   = PRICE_LABELS[place.price_level];
       const open    = place.opening_hours?.open_now;
       const openTag = open === true
-        ? `<span class="tag tag-open">Open now</span>`
+        ? '<span class="tag tag-open">Open now</span>'
         : open === false
-          ? `<span class="tag tag-closed">Closed</span>`
+          ? '<span class="tag tag-closed">Closed</span>'
           : '';
 
-      // Numeric values: safe from XSS — toFixed/toLocaleString return digit strings only
+      // Numeric values: toFixed/toLocaleString return digit strings only — safe from XSS
       const ratingFixed      = place.rating.toFixed(1);
       const reviewsFormatted = place.user_ratings_total.toLocaleString();
 
-      return `
-        <div class="card" data-testid="restaurant-card" data-card-index="${index}">
-          <div class="card-name">${escHtml(place.name)}</div>
-          <div class="card-rating-block" aria-label="${ratingFixed} out of 5, ${reviewsFormatted} reviews">
-            <div class="rating-badge">
-              <div class="rating-score">${ratingFixed}</div>
-              <div class="stars-row" aria-hidden="true">${starsHtml(place.rating)}</div>
-            </div>
-            <div class="review-count">${reviewsFormatted}<br>reviews</div>
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.setAttribute('data-testid', 'restaurant-card');
+      card.innerHTML = `
+        <div class="card-name">${escHtml(place.name)}</div>
+        <div class="card-rating-block" aria-label="${ratingFixed} out of 5, ${reviewsFormatted} reviews">
+          <div class="rating-badge">
+            <div class="rating-score">${ratingFixed}</div>
+            <div class="stars-row" aria-hidden="true">${starsHtml(place.rating)}</div>
           </div>
-          <div class="card-meta">
-            ${price   ? `<span class="tag tag-price">${escHtml(price)}</span>` : ''}
-            ${cuisine ? `<span class="tag tag-cuisine">${escHtml(cuisine)}</span>` : ''}
-            ${openTag}
-          </div>
-          <div class="card-address">${escHtml(place.vicinity || '')}</div>
-        </div>`;
-    }).join('');
-
-    document.getElementById('results').innerHTML = html;
+          <div class="review-count">${reviewsFormatted}<br>reviews</div>
+        </div>
+        <div class="card-meta">
+          ${price   ? `<span class="tag tag-price">${escHtml(price)}</span>` : ''}
+          ${cuisine ? `<span class="tag tag-cuisine">${escHtml(cuisine)}</span>` : ''}
+          ${openTag}
+        </div>
+        <div class="card-address">${escHtml(place.vicinity || '')}</div>`;
+      container.appendChild(card);
+    });
   }
 
   function escHtml(str) {
@@ -666,6 +981,14 @@
   // Allow pressing Enter to search
   document.getElementById('locationInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') startSearch();
+  });
+
+  // Close cuisine panel on outside click
+  document.addEventListener('click', e => {
+    const wrap = document.getElementById('cuisineWrap');
+    if (wrap && !wrap.contains(e.target)) {
+      document.getElementById('cuisinePanel').classList.remove('open');
+    }
   });
 </script>
 
