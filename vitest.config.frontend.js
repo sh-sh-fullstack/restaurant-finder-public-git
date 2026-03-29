@@ -22,5 +22,15 @@ export default defineConfig({
     environment: 'jsdom',
     include: ['**/*.integration.test.js', '**/index.unit.test.js', '**/index.security.test.js'],
     exclude: ['**/node_modules/**'],
+    // Phase 2.510 — Coverage analysis, not enforcement.
+    // NOTE: V8 cannot instrument scripts embedded inside <script> tags in
+    // index.html when loaded via JSDOM runScripts:'dangerously'. Coverage
+    // here reflects test-file instrumentation only (expected: ~0% on index.html).
+    // The 30 passing tests are the real quality signal, not this number.
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'json-summary'],
+      reportsDirectory: './coverage/frontend',
+    },
   },
 });

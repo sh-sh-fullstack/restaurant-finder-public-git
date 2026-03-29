@@ -1,2 +1,6 @@
 wrangler.toml
 node_modules/
+
+# Phase 2.510 — Coverage reports are generated locally; never commit to GitHub
+coverage/
+.nyc_output/

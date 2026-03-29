@@ -14,5 +14,10 @@ export default defineWorkersConfig({
         },
       },
     },
+    // Phase 2.510 — Backend V8 coverage is NOT supported with vitest-pool-workers.
+    // @vitest/coverage-v8 requires node:inspector, which is unavailable inside
+    // workerd (Cloudflare's sandboxed V8 runtime). This is a documented known
+    // issue: https://developers.cloudflare.com/workers/testing/vitest-integration/known-issues/
+    // Backend coverage is assessed manually — see Phase 2.510 analysis in commit notes.
   },
 });
