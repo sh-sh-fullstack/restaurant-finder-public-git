@@ -15,7 +15,9 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const HTML = readFileSync(resolve(__dirname, 'index.html'), 'utf8');
+const HTML       = readFileSync(resolve(__dirname, 'index.html'),   'utf8');
+const ABOUT_HTML = readFileSync(resolve(__dirname, 'about.html'),   'utf8');
+const FORMULA_HTML = readFileSync(resolve(__dirname, 'formula.html'), 'utf8');
 
 /**
  * Creates an isolated JSDOM instance with index.html loaded and scripts executed.
@@ -186,5 +188,61 @@ describe('Missing Data Tests', () => {
     expect(card).toBeTruthy();
     expect(card.querySelector('.tag-open')).toBeNull();
     expect(card.querySelector('.tag-closed')).toBeNull();
+  });
+});
+
+// ── 6. About Page Smoke Tests ──────────────────────────────────────────────
+
+describe('About Page Smoke Tests', () => {
+  function makeAboutDom() {
+    const dom = new JSDOM(ABOUT_HTML, { url: 'http://localhost' });
+    return { doc: dom.window.document };
+  }
+
+  it('about.html loads and contains expected heading text', () => {
+    const { doc } = makeAboutDom();
+    expect(doc.querySelector('h1')).toBeTruthy();
+    expect(doc.querySelector('h1').textContent).toContain('Proven');
+  });
+
+  it('about.html contains the key body text about searching by review count', () => {
+    const { doc } = makeAboutDom();
+    expect(doc.body.textContent).toContain('number of reviews');
+  });
+
+  it('about.html has a back-link pointing to index.html', () => {
+    const { doc } = makeAboutDom();
+    const backLink = doc.querySelector('[data-testid="back-link"]');
+    expect(backLink).toBeTruthy();
+    expect(backLink.getAttribute('href')).toBe('index.html');
+  });
+});
+
+// ── 7. Formula Page Smoke Tests ────────────────────────────────────────────
+
+describe('Formula Page Smoke Tests', () => {
+  function makeFormulaDom() {
+    const dom = new JSDOM(FORMULA_HTML, { url: 'http://localhost' });
+    return { doc: dom.window.document };
+  }
+
+  it('formula.html loads and contains expected heading text', () => {
+    const { doc } = makeFormulaDom();
+    expect(doc.querySelector('h1')).toBeTruthy();
+    expect(doc.querySelector('h1').textContent).toContain('Proven');
+  });
+
+  it('formula.html contains the formula block', () => {
+    const { doc } = makeFormulaDom();
+    const formulaBlock = doc.querySelector('[data-testid="formula-block"]');
+    expect(formulaBlock).toBeTruthy();
+    expect(formulaBlock.textContent).toContain('score');
+  });
+
+  it('formula.html has a back-link pointing to index.html', () => {
+    const { doc } = makeFormulaDom();
+    const backLink = doc.querySelector('[data-testid="back-link"]');
+    expect(backLink).toBeTruthy();
+    expect(backLink.getAttribute('href')).toBe('index.html');
   });
 });

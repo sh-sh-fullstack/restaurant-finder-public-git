@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- No connect-src: this page makes no API calls.
+       No script-src: this page has no JavaScript. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'none';" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <title>About — Proven</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400;1,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:          #0e0c0a;
+      --cream:       #f0ebe0;
+      --gold:        #c49e50;
+      --gold-border: rgba(196,158,80,0.28);
+      --secondary:   #8a8070;
+      --muted:       #5a5040;
+      --border:      rgba(240,235,224,0.09);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Instrument Sans', system-ui, sans-serif;
+      background-color: var(--bg);
+      color: var(--cream);
+      min-height: 100vh;
+    }
+
+    /* Ambient radial gradient — matches index.html exactly */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -15%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(700px, 150vw);
+      height: 600px;
+      background:
+        radial-gradient(ellipse at 50% 20%, rgba(196,158,80,0.09) 0%, transparent 60%),
+        radial-gradient(ellipse at 20% 90%, rgba(196,158,80,0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Header ── */
+    header {
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .header-content {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 52px 24px 36px;
+    }
+
+    .header-bg-mark {
+      position: absolute;
+      top: -12px;
+      right: -16px;
+      font-family: 'Instrument Sans', system-ui, sans-serif;
+      font-size: 190px;
+      font-weight: 900;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(196,158,80,0.09);
+      pointer-events: none;
+      user-select: none;
+      line-height: 1;
+      z-index: 0;
+    }
+
+    .header-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 22px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex-shrink: 0;
+      animation: pulse-dot 2.2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(196,158,80,0.5); }
+      50%       { opacity: 0.65; box-shadow: 0 0 0 5px rgba(196,158,80,0); }
+    }
+
+    .eyebrow-text {
+      font-size: 0.67rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--secondary);
+    }
+
+    .app-title {
+      font-family: 'Instrument Sans', system-ui, sans-serif;
+      font-size: 58px;
+      font-weight: 700;
+      color: var(--cream);
+      line-height: 1;
+      margin-bottom: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .app-title em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .header-divider {
+      width: 36px;
+      height: 1px;
+      background: var(--gold-border);
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Skyline strip ── */
+    .skyline {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 72px;
+      padding: 0 24px;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+    }
+
+    .skyline::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 24px;
+      background: linear-gradient(to top, var(--bg), transparent);
+      pointer-events: none;
+    }
+
+    .skyline-bar {
+      flex: 1;
+      min-width: 0;
+      background: linear-gradient(to top, var(--gold), rgba(196,158,80,0.18));
+      border-radius: 1px 1px 0 0;
+      transform-origin: bottom;
+      will-change: transform;
+      animation: breathe 3s ease-in-out infinite;
+      animation-delay: var(--d, 0s);
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scaleY(1);    opacity: 0.55; }
+      50%       { transform: scaleY(0.5); opacity: 0.25; }
+    }
+
+    /* ── Page content ── */
+    .page-content {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 40px 24px 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-section-label {
+      font-size: 0.63rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .page-body {
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: var(--secondary);
+      margin-bottom: 40px;
+    }
+
+    /* ── Back link ── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.77rem;
+      font-weight: 600;
+      color: var(--secondary);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .back-link:hover {
+      color: var(--gold);
+      border-color: var(--gold-border);
+    }
+
+    /* ── Footer ── */
+    .site-footer {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px 24px 40px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .site-footer a {
+      font-size: 0.73rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      transition: color 0.15s;
+    }
+
+    .site-footer a:hover {
+      color: var(--gold);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .skyline-bar { animation: none; }
+      .eyebrow-dot { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-bg-mark" aria-hidden="true">8M</div>
+  <div class="header-content">
+    <div class="header-eyebrow">
+      <span class="eyebrow-dot"></span>
+      <span class="eyebrow-text">About</span>
+    </div>
+    <h1 class="app-title">Pro<em>ven</em></h1>
+    <div class="header-divider" aria-hidden="true"></div>
+  </div>
+</header>
+
+<div class="skyline" aria-hidden="true">
+  <div class="skyline-bar" style="height:45px;--d:0s"></div>
+  <div class="skyline-bar" style="height:60px;--d:.4s"></div>
+  <div class="skyline-bar" style="height:28px;--d:.8s"></div>
+  <div class="skyline-bar" style="height:55px;--d:1.2s"></div>
+  <div class="skyline-bar" style="height:72px;--d:1.6s"></div>
+  <div class="skyline-bar" style="height:38px;--d:2.0s"></div>
+  <div class="skyline-bar" style="height:65px;--d:.2s"></div>
+  <div class="skyline-bar" style="height:48px;--d:.6s"></div>
+  <div class="skyline-bar" style="height:30px;--d:1.0s"></div>
+  <div class="skyline-bar" style="height:70px;--d:1.4s"></div>
+  <div class="skyline-bar" style="height:42px;--d:1.8s"></div>
+  <div class="skyline-bar" style="height:58px;--d:.1s"></div>
+  <div class="skyline-bar" style="height:35px;--d:.5s"></div>
+  <div class="skyline-bar" style="height:68px;--d:.9s"></div>
+  <div class="skyline-bar" style="height:52px;--d:1.3s"></div>
+  <div class="skyline-bar" style="height:40px;--d:1.7s"></div>
+  <div class="skyline-bar" style="height:62px;--d:2.1s"></div>
+  <div class="skyline-bar" style="height:25px;--d:.3s"></div>
+  <div class="skyline-bar" style="height:55px;--d:.7s"></div>
+  <div class="skyline-bar" style="height:44px;--d:1.1s"></div>
+</div>
+
+<main class="page-content">
+  <p class="page-section-label">The idea</p>
+  <p class="page-body">
+    It's virtually not possible to search restaurants by number of reviews in any of the app
+    available out there today! The idea for this page came to be because whenever I would go
+    to a place I would want to visit the tried and tested restaurants that can get me a feeling
+    of the area. Restaurants that have been voted by customer feet. And then came the idea of
+    infusing a Bayesian logic of also prioritizing ratings.
+  </p>
+  <a href="index.html" class="back-link" data-testid="back-link">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    Back to search
+  </a>
+</main>
+
+<footer class="site-footer">
+  <a href="index.html">Search</a>
+  <a href="formula.html">The Formula</a>
+</footer>
+
+</body>
+</html>

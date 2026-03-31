@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- No connect-src: this page makes no API calls.
+       No script-src: this page has no JavaScript. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'none';" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <title>The Formula — Proven</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400;1,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:          #0e0c0a;
+      --cream:       #f0ebe0;
+      --gold:        #c49e50;
+      --gold-border: rgba(196,158,80,0.28);
+      --gold-dim:    rgba(196,158,80,0.08);
+      --secondary:   #8a8070;
+      --muted:       #5a5040;
+      --border:      rgba(240,235,224,0.09);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Instrument Sans', system-ui, sans-serif;
+      background-color: var(--bg);
+      color: var(--cream);
+      min-height: 100vh;
+    }
+
+    /* Ambient radial gradient — matches index.html exactly */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -15%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(700px, 150vw);
+      height: 600px;
+      background:
+        radial-gradient(ellipse at 50% 20%, rgba(196,158,80,0.09) 0%, transparent 60%),
+        radial-gradient(ellipse at 20% 90%, rgba(196,158,80,0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Header ── */
+    header {
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .header-content {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 52px 24px 36px;
+    }
+
+    .header-bg-mark {
+      position: absolute;
+      top: -12px;
+      right: -16px;
+      font-family: 'Instrument Sans', system-ui, sans-serif;
+      font-size: 190px;
+      font-weight: 900;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(196,158,80,0.09);
+      pointer-events: none;
+      user-select: none;
+      line-height: 1;
+      z-index: 0;
+    }
+
+    .header-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 22px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex-shrink: 0;
+      animation: pulse-dot 2.2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(196,158,80,0.5); }
+      50%       { opacity: 0.65; box-shadow: 0 0 0 5px rgba(196,158,80,0); }
+    }
+
+    .eyebrow-text {
+      font-size: 0.67rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--secondary);
+    }
+
+    .app-title {
+      font-family: 'Instrument Sans', system-ui, sans-serif;
+      font-size: 58px;
+      font-weight: 700;
+      color: var(--cream);
+      line-height: 1;
+      margin-bottom: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .app-title em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .header-divider {
+      width: 36px;
+      height: 1px;
+      background: var(--gold-border);
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Skyline strip ── */
+    .skyline {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 72px;
+      padding: 0 24px;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+    }
+
+    .skyline::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 24px;
+      background: linear-gradient(to top, var(--bg), transparent);
+      pointer-events: none;
+    }
+
+    .skyline-bar {
+      flex: 1;
+      min-width: 0;
+      background: linear-gradient(to top, var(--gold), rgba(196,158,80,0.18));
+      border-radius: 1px 1px 0 0;
+      transform-origin: bottom;
+      will-change: transform;
+      animation: breathe 3s ease-in-out infinite;
+      animation-delay: var(--d, 0s);
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scaleY(1);    opacity: 0.55; }
+      50%       { transform: scaleY(0.5); opacity: 0.25; }
+    }
+
+    /* ── Page content ── */
+    .page-content {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 40px 24px 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-section-label {
+      font-size: 0.63rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .page-body {
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: var(--secondary);
+      margin-bottom: 32px;
+    }
+
+    /* ── Formula display ── */
+    .formula-block {
+      background: var(--gold-dim);
+      border: 1px solid var(--gold-border);
+      border-radius: 4px;
+      padding: 28px;
+      margin: 32px 0;
+    }
+
+    .formula-display {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--cream);
+      letter-spacing: 0.03em;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    .formula-display em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    /* Variable definitions */
+    .var-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .var-row {
+      display: flex;
+      gap: 14px;
+      align-items: baseline;
+    }
+
+    .var-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      font-style: italic;
+      color: var(--gold);
+      flex-shrink: 0;
+      min-width: 20px;
+    }
+
+    .var-def {
+      font-size: 0.82rem;
+      color: var(--secondary);
+      line-height: 1.5;
+    }
+
+    /* ── Section headings ── */
+    h2 {
+      font-family: 'Instrument Sans', system-ui, sans-serif;
+      font-size: 0.77rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* ── Example table ── */
+    .example-block {
+      border-top: 1px solid var(--border);
+      padding-top: 32px;
+      margin-top: 32px;
+    }
+
+    .example-note {
+      font-size: 0.73rem;
+      font-style: italic;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .example-row {
+      border-top: 1px solid var(--border);
+      padding: 18px 0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .example-row:last-of-type {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .example-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 4px;
+    }
+
+    .example-stats {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .example-score {
+      text-align: right;
+    }
+
+    .example-score-value {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+      margin-bottom: 3px;
+    }
+
+    .example-score-label {
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .example-insight {
+      font-size: 0.82rem;
+      line-height: 1.65;
+      color: var(--secondary);
+      margin-top: 20px;
+    }
+
+    /* ── Back link ── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.77rem;
+      font-weight: 600;
+      color: var(--secondary);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+      margin-top: 40px;
+    }
+
+    .back-link:hover {
+      color: var(--gold);
+      border-color: var(--gold-border);
+    }
+
+    /* ── Footer ── */
+    .site-footer {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px 24px 40px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .site-footer a {
+      font-size: 0.73rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      transition: color 0.15s;
+    }
+
+    .site-footer a:hover {
+      color: var(--gold);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .skyline-bar { animation: none; }
+      .eyebrow-dot { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-bg-mark" aria-hidden="true">8M</div>
+  <div class="header-content">
+    <div class="header-eyebrow">
+      <span class="eyebrow-dot"></span>
+      <span class="eyebrow-text">The Formula</span>
+    </div>
+    <h1 class="app-title">Pro<em>ven</em></h1>
+    <div class="header-divider" aria-hidden="true"></div>
+  </div>
+</header>
+
+<div class="skyline" aria-hidden="true">
+  <div class="skyline-bar" style="height:45px;--d:0s"></div>
+  <div class="skyline-bar" style="height:60px;--d:.4s"></div>
+  <div class="skyline-bar" style="height:28px;--d:.8s"></div>
+  <div class="skyline-bar" style="height:55px;--d:1.2s"></div>
+  <div class="skyline-bar" style="height:72px;--d:1.6s"></div>
+  <div class="skyline-bar" style="height:38px;--d:2.0s"></div>
+  <div class="skyline-bar" style="height:65px;--d:.2s"></div>
+  <div class="skyline-bar" style="height:48px;--d:.6s"></div>
+  <div class="skyline-bar" style="height:30px;--d:1.0s"></div>
+  <div class="skyline-bar" style="height:70px;--d:1.4s"></div>
+  <div class="skyline-bar" style="height:42px;--d:1.8s"></div>
+  <div class="skyline-bar" style="height:58px;--d:.1s"></div>
+  <div class="skyline-bar" style="height:35px;--d:.5s"></div>
+  <div class="skyline-bar" style="height:68px;--d:.9s"></div>
+  <div class="skyline-bar" style="height:52px;--d:1.3s"></div>
+  <div class="skyline-bar" style="height:40px;--d:1.7s"></div>
+  <div class="skyline-bar" style="height:62px;--d:2.1s"></div>
+  <div class="skyline-bar" style="height:25px;--d:.3s"></div>
+  <div class="skyline-bar" style="height:55px;--d:.7s"></div>
+  <div class="skyline-bar" style="height:44px;--d:1.1s"></div>
+</div>
+
+<main class="page-content">
+
+  <p class="page-section-label">Bayesian ranking</p>
+
+  <p class="page-body">
+    A raw star rating alone is unreliable. A brand-new restaurant with three five-star reviews
+    looks better than a beloved neighbourhood spot with 4.4 stars across 8,000 visits — but it
+    isn't. Proven uses a Bayesian ranking formula to balance a place's actual rating against the
+    weight of evidence behind it.
+  </p>
+
+  <!-- Formula display -->
+  <div class="formula-block" data-testid="formula-block">
+    <p class="formula-display">
+      score = (<em>C</em> &times; <em>m</em> + <em>R</em> &times; <em>v</em>) / (<em>m</em> + <em>v</em>)
+    </p>
+    <div class="var-list" aria-label="Variable definitions">
+      <div class="var-row">
+        <span class="var-name">C</span>
+        <span class="var-def">Mean rating of all qualifying results in this search — the prior belief about what an average restaurant looks like here</span>
+      </div>
+      <div class="var-row">
+        <span class="var-name">m</span>
+        <span class="var-def">1,000 — the minimum review threshold and prior weight; every place is treated as though it starts with 1,000 imaginary average-rated reviews</span>
+      </div>
+      <div class="var-row">
+        <span class="var-name">R</span>
+        <span class="var-def">The individual place's actual star rating</span>
+      </div>
+      <div class="var-row">
+        <span class="var-name">v</span>
+        <span class="var-def">The individual place's real review count</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plain-English explanation -->
+  <h2>What it does</h2>
+  <p class="page-body">
+    The formula pulls every place's score toward the search average before sorting. A restaurant
+    with very few reviews gets pulled strongly toward the mean — its score mostly reflects what a
+    typical place here looks like, not its own limited data. A restaurant with thousands of reviews
+    resists that pull; its score stays close to its actual rating because the evidence is strong
+    enough to trust. The more votes a place has earned, the more it speaks for itself.
+  </p>
+
+  <!-- Concrete example -->
+  <section class="example-block">
+    <h2>Example</h2>
+    <p class="example-note">
+      Assuming a search where the mean rating of all qualifying results is C&nbsp;=&nbsp;4.2.
+      (C varies with every search — this is illustrative.)
+    </p>
+
+    <div class="example-row">
+      <div>
+        <p class="example-name">Corner Slice</p>
+        <p class="example-stats">
+          4.8 stars &nbsp;·&nbsp; 80 reviews<br>
+          score = (4.2 &times; 1,000 + 4.8 &times; 80) / (1,000 + 80)<br>
+          = 4,584 / 1,080 &asymp; <strong>4.24</strong>
+        </p>
+      </div>
+      <div class="example-score">
+        <p class="example-score-value">4.24</p>
+        <p class="example-score-label">Proven score</p>
+      </div>
+    </div>
+
+    <div class="example-row">
+      <div>
+        <p class="example-name">Joe's Diner</p>
+        <p class="example-stats">
+          4.4 stars &nbsp;·&nbsp; 5,200 reviews<br>
+          score = (4.2 &times; 1,000 + 4.4 &times; 5,200) / (1,000 + 5,200)<br>
+          = 27,080 / 6,200 &asymp; <strong>4.37</strong>
+        </p>
+      </div>
+      <div class="example-score">
+        <p class="example-score-value">4.37</p>
+        <p class="example-score-label">Proven score</p>
+      </div>
+    </div>
+
+    <p class="example-insight">
+      Joe's Diner ranks higher despite its lower raw rating. Corner Slice's 4.8 stars comes from
+      only 80 people — impressive, but statistically thin. Joe's 4.4 from 5,200 visits is a
+      verdict delivered by thousands of independent decisions. Proven surfaces the place the city
+      has actually chosen, not the one that got lucky with a small sample.
+    </p>
+  </section>
+
+  <a href="index.html" class="back-link" data-testid="back-link">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    Back to search
+  </a>
+
+</main>
+
+<footer class="site-footer">
+  <a href="index.html">Search</a>
+  <a href="about.html">About</a>
+</footer>
+
+</body>
+</html>
