@@ -769,6 +769,31 @@
       .eyebrow-dot   { animation: none; }
       .spinner       { animation: none; }
     }
+
+    /* ── Site footer ─────────────────────────────────────────────── */
+    .site-footer {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px 24px 40px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .site-footer a {
+      font-size: 0.73rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      transition: color 0.15s;
+    }
+
+    .site-footer a:hover {
+      color: var(--gold);
+    }
   </style>
 </head>
 <body>
@@ -1365,6 +1390,11 @@
   // Initialize slider fill and stats radius on load
   updateRadiusLabel();
 </script>
+
+<footer class="site-footer">
+  <a href="about.html">About</a>
+  <a href="formula.html">The Formula</a>
+</footer>
 
 </body>
 </html>
