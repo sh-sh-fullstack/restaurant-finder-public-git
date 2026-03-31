@@ -568,6 +568,17 @@
       flex-shrink: 0;
     }
 
+    .fallback-notice {
+      font-size: 0.78rem;
+      color: var(--secondary);
+      background: rgba(196,158,80,0.06);
+      border: 1px solid var(--gold-border);
+      border-radius: 4px;
+      padding: 8px 12px;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
     /* ── Results list ────────────────────────────────────────────── */
     .results {
       max-width: 480px;
@@ -907,6 +918,12 @@
   // Filter state — module-level so selections persist across searches
   let baseResults      = []; // 1000+-qualified places, Bayesian-ranked; populated once per search
   let selectedCuisines = new Set(); // empty Set = no filter (all cuisines shown)
+  // ZIP fallback state — set when input is a 5-digit ZIP and the first search yields no qualified
+  // results; holds { zip, city, state } so runZipFallback() can retry from the city centre
+  let zipFallbackData      = null;
+  // Persists the fallback notice { zip, city, state } across filter changes so applyFilters()
+  // can re-render the notice after cuisine / open-now filtering without a new search
+  let currentFallbackNotice = null;
 
   function getRadiusMiles() {
     return parseFloat(document.getElementById('radiusSlider').value);
@@ -962,6 +979,25 @@
           document.getElementById('searchBtn').disabled = false;
           return;
         }
+
+        // For 5-digit ZIP searches: capture city and state from the geocoding response so that,
+        // if no restaurants pass the MIN_REVIEWS filter, runZipFallback() can retry the search
+        // centred on the city rather than the ZIP centroid (which may be in a residential area).
+        zipFallbackData       = null;
+        currentFallbackNotice = null;
+        if (/^\d{5}$/.test(raw)) {
+          try {
+            const comps      = data.results[0].address_components;
+            const cityComp   = comps.find(c => c.types.includes('locality'));
+            const stateComp  = comps.find(c => c.types.includes('administrative_area_level_1'));
+            if (cityComp && stateComp) {
+              zipFallbackData = { zip: raw, city: cityComp.long_name, state: stateComp.short_name };
+            }
+          } catch (e) {
+            // Extraction failed — ZIP fallback silently disabled for this search
+          }
+        }
+
         searchRestaurants(data.results[0].geometry.location);
       })
       .catch(() => {
@@ -970,7 +1006,7 @@
       });
   }
 
-  function searchRestaurants(location) {
+  function searchRestaurants(location, fallbackNotice) {
     setStatus('Searching for restaurants...', false, true);
     const allResults = [];
 
@@ -989,12 +1025,17 @@
               // Google requires ~2s before next_page_token becomes valid
               setTimeout(() => fetchPage(data.next_page_token), 2000);
             } else {
-              renderResults(allResults);
+              renderResults(allResults, fallbackNotice);
             }
           } else if (data.status === 'ZERO_RESULTS') {
             // May happen on a subsequent page; show whatever we already have
             if (allResults.length) {
-              renderResults(allResults);
+              renderResults(allResults, fallbackNotice);
+            } else if (zipFallbackData) {
+              // ZIP search returned nothing at all from Google — try the city centre
+              const fallback = zipFallbackData;
+              zipFallbackData = null;
+              runZipFallback(fallback);
             } else {
               setStatus('No restaurants found near that location.');
               document.getElementById('searchBtn').disabled = false;
@@ -1002,7 +1043,7 @@
           } else {
             // On a mid-pagination error, render whatever was already fetched
             if (allResults.length) {
-              renderResults(allResults);
+              renderResults(allResults, fallbackNotice);
             } else {
               setStatus(`Places API error: ${data.status}`, true);
               document.getElementById('searchBtn').disabled = false;
@@ -1011,7 +1052,7 @@
         })
         .catch(() => {
           if (allResults.length) {
-            renderResults(allResults);
+            renderResults(allResults, fallbackNotice);
           } else {
             setStatus('Could not reach the search service. Please check your network connection.', true);
             document.getElementById('searchBtn').disabled = false;
@@ -1020,6 +1061,50 @@
     }
 
     fetchPage(null);
+  }
+
+  // ZIP fallback: geocodes the city extracted from the original ZIP geocoding response, then
+  // re-runs the restaurant search centred on the city. Called only when a ZIP search yields
+  // zero qualified results and city/state extraction succeeded in startSearch().
+  function runZipFallback(fallback) {
+    const cityQuery = fallback.city + ', ' + fallback.state;
+    setStatus('Searching nearby city...', false, true);
+    workerFetch('maps/api/geocode/json', { address: cityQuery })
+      .then(geoData => {
+        if (geoData.status === 'OK' && geoData.results.length) {
+          searchRestaurants(geoData.results[0].geometry.location, fallback);
+        } else {
+          showEmptyState();
+        }
+      })
+      .catch(() => showEmptyState());
+  }
+
+  function showEmptyState() {
+    document.getElementById('searchBtn').disabled = false;
+    setStatus('');
+    document.getElementById('resultsMeta').innerHTML = '';
+    document.getElementById('filterRow').style.display = 'none';
+    const statsEl = document.getElementById('statsStrip');
+    if (statsEl) statsEl.style.display = 'none';
+    document.getElementById('results').innerHTML = `
+      <div class="empty-state">
+        <svg width="88" height="88" viewBox="0 0 88 88" fill="none" stroke="currentColor"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="34" cy="50" r="22" stroke-width="2.5"/>
+          <circle cx="34" cy="50" r="13" stroke-width="1.5"/>
+          <line x1="10" y1="26" x2="10" y2="36" stroke-width="2.5"/>
+          <line x1="7"  y1="26" x2="7"  y2="32" stroke-width="1.5"/>
+          <line x1="13" y1="26" x2="13" y2="32" stroke-width="1.5"/>
+          <line x1="10" y1="36" x2="10" y2="48" stroke-width="2.5"/>
+          <path d="M58 26 C58 26 62 30 62 36 L60 42 L60 52" stroke-width="2.5"/>
+          <circle cx="60" cy="28" r="16" stroke-width="3"/>
+          <line x1="72" y1="40" x2="82" y2="50" stroke-width="3.5"/>
+        </svg>
+        <strong>No results found</strong>
+        No restaurants with 1,000+ reviews found within ${getRadiusMiles()} mile${getRadiusMiles() === 1 ? '' : 's'}.
+        <br>Try a different location or city center.
+      </div>`;
   }
 
   // Inline SVG stars — reference shared gradient in <defs> above for half star
@@ -1107,41 +1192,20 @@
     return (C * m + R * v) / (m + v);
   }
 
-  function renderResults(all) {
+  function renderResults(all, fallbackNotice) {
     document.getElementById('searchBtn').disabled = false;
 
     const qualified = all.filter(p => p.user_ratings_total >= MIN_REVIEWS && p.rating);
 
     if (!qualified.length) {
-      baseResults = [];
-      setStatus('');
-      document.getElementById('resultsMeta').innerHTML = '';
-      document.getElementById('filterRow').style.display = 'none';
-      const statsEl = document.getElementById('statsStrip');
-      if (statsEl) statsEl.style.display = 'none';
-      document.getElementById('results').innerHTML = `
-        <div class="empty-state">
-          <svg width="88" height="88" viewBox="0 0 88 88" fill="none" stroke="currentColor"
-               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <!-- Plate outer ring -->
-            <circle cx="34" cy="50" r="22" stroke-width="2.5"/>
-            <!-- Plate inner ring -->
-            <circle cx="34" cy="50" r="13" stroke-width="1.5"/>
-            <!-- Fork (left of plate) -->
-            <line x1="10" y1="26" x2="10" y2="36" stroke-width="2.5"/>
-            <line x1="7"  y1="26" x2="7"  y2="32" stroke-width="1.5"/>
-            <line x1="13" y1="26" x2="13" y2="32" stroke-width="1.5"/>
-            <line x1="10" y1="36" x2="10" y2="48" stroke-width="2.5"/>
-            <!-- Knife (right of plate) -->
-            <path d="M58 26 C58 26 62 30 62 36 L60 42 L60 52" stroke-width="2.5"/>
-            <!-- Magnifying glass -->
-            <circle cx="60" cy="28" r="16" stroke-width="3"/>
-            <line x1="72" y1="40" x2="82" y2="50" stroke-width="3.5"/>
-          </svg>
-          <strong>No results found</strong>
-          No restaurants with 1,000+ reviews found within ${getRadiusMiles()} mile${getRadiusMiles() === 1 ? '' : 's'}.
-          <br>Try a different location or city center.
-        </div>`;
+      // ZIP fallback: first search yielded no qualified results — retry from the city centre
+      if (zipFallbackData) {
+        const fallback = zipFallbackData;
+        zipFallbackData = null;
+        runZipFallback(fallback);
+        return;
+      }
+      showEmptyState();
       return;
     }
 
@@ -1151,6 +1215,9 @@
     baseResults = qualified
       .map(p => Object.assign({}, p, { _score: bayesianScore(C, m, p.rating, p.user_ratings_total) }))
       .sort((a, b) => b._score - a._score);
+
+    // Store the fallback notice (if any) so applyFilters() can re-render it on filter changes
+    currentFallbackNotice = fallbackNotice || null;
 
     // Derive cuisine options once from baseResults, before any filtering
     const cuisineSet = new Set(baseResults.map(getCuisine));
@@ -1268,6 +1335,26 @@
     // Step 5: update results header
     const metaEl = document.getElementById('resultsMeta');
     metaEl.innerHTML = '';
+
+    // If results are from the ZIP fallback, show a notice above the header.
+    // Uses createElement/createTextNode — never innerHTML — to prevent XSS.
+    if (currentFallbackNotice) {
+      const notice = document.createElement('div');
+      notice.className = 'fallback-notice';
+      notice.appendChild(document.createTextNode('No results found for '));
+      const zipSpan = document.createElement('strong');
+      zipSpan.appendChild(document.createTextNode(currentFallbackNotice.zip));
+      notice.appendChild(zipSpan);
+      notice.appendChild(document.createTextNode('. Showing results for '));
+      const citySpan = document.createElement('strong');
+      citySpan.appendChild(document.createTextNode(
+        currentFallbackNotice.city + ', ' + currentFallbackNotice.state
+      ));
+      notice.appendChild(citySpan);
+      notice.appendChild(document.createTextNode(' instead.'));
+      metaEl.appendChild(notice);
+    }
+
     const hdr = document.createElement('div');
     hdr.className = 'results-header';
     const leftSpan = document.createElement('span');
