@@ -632,50 +632,6 @@
       text-align: right;
     }
 
-    /* Crowd bar row */
-    .crowd-bar-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 13px;
-    }
-
-    .crowd-bar-label {
-      font-size: 0.6rem;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      flex-shrink: 0;
-      min-width: 58px;
-    }
-
-    .crowd-segs {
-      display: flex;
-      gap: 2px;
-      flex: 1;
-    }
-
-    .crowd-seg {
-      flex: 1;
-      height: 5px;
-      border-radius: 1px;
-      background: rgba(240,235,224,0.05);
-      border: 1px solid rgba(240,235,224,0.07);
-    }
-
-    .crowd-seg.filled {
-      background: var(--gold);
-      border-color: var(--gold);
-    }
-
-    .crowd-bar-text {
-      font-size: 0.63rem;
-      color: var(--secondary);
-      flex-shrink: 0;
-      min-width: 50px;
-      text-align: right;
-    }
 
     /* Tags */
     .card-meta {
@@ -1388,17 +1344,6 @@
       const ratingFixed      = place.rating.toFixed(1);
       const reviewsFormatted = place.user_ratings_total.toLocaleString();
 
-      // Crowd bar thresholds
-      const reviews = place.user_ratings_total;
-      let crowdFilled, crowdLabel;
-      if (reviews >= 15000)     { crowdFilled = 9; crowdLabel = 'Very high'; }
-      else if (reviews >= 8000) { crowdFilled = 7; crowdLabel = 'High'; }
-      else                      { crowdFilled = 5; crowdLabel = 'Moderate'; }
-      let crowdBars = '';
-      for (let i = 0; i < 11; i++) {
-        crowdBars += `<span class="crowd-seg${i < crowdFilled ? ' filled' : ''}"></span>`;
-      }
-
       const card = document.createElement('div');
       card.className = 'card';
       card.setAttribute('data-testid', 'restaurant-card');
@@ -1413,11 +1358,6 @@
             <div class="rating-score">${ratingFixed}</div>
             <div class="review-count">${reviewsFormatted} reviews</div>
           </div>
-        </div>
-        <div class="crowd-bar-row">
-          <span class="crowd-bar-label">Crowd size</span>
-          <div class="crowd-segs">${crowdBars}</div>
-          <span class="crowd-bar-text">${crowdLabel}</span>
         </div>
         <div class="card-meta">
           ${price   ? `<span class="tag tag-price">${escHtml(price)}</span>` : ''}
