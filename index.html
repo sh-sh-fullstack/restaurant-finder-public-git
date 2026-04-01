@@ -530,8 +530,6 @@
     .results-header {
       display: flex;
       align-items: baseline;
-      justify-content: space-between;
-      gap: 12px;
     }
 
     .results-header-left {
@@ -545,13 +543,6 @@
       color: var(--gold);
       font-style: italic;
       font-weight: 700;
-    }
-
-    .results-header-right {
-      font-size: 0.67rem;
-      color: var(--muted);
-      letter-spacing: 0.06em;
-      flex-shrink: 0;
     }
 
     .fallback-notice {
@@ -1351,11 +1342,7 @@
     leftSpan.appendChild(document.createTextNode(
       '\u00a0restaurant' + (totalVisible !== 1 ? 's' : '') + ' that passed'
     ));
-    const rightSpan = document.createElement('span');
-    rightSpan.className = 'results-header-right';
-    rightSpan.appendChild(document.createTextNode('By crowd size \u2193'));
     hdr.appendChild(leftSpan);
-    hdr.appendChild(rightSpan);
     metaEl.appendChild(hdr);
 
     // Step 6: render cards
