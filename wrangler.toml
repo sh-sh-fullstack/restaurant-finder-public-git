@@ -1,0 +1,18 @@
+# wrangler.toml — committed to git (contains no secrets).
+#
+# Used by vitest-pool-workers (npm test) to configure the Cloudflare Workers
+# test environment locally and in GitHub Actions CI.
+#
+# GOOGLE_API_KEY is intentionally absent — tests inject it explicitly via
+# makeEnv() so the "missing key" 503 error-path tests work correctly.
+# The real GOOGLE_API_KEY lives in Cloudflare dashboard secrets only.
+#
+# The KV namespace id below is a placeholder; vitest-pool-workers mocks the
+# KV binding in tests and never connects to a real Cloudflare KV store.
+name = "restaurant-finder"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[[kv_namespaces]]
+binding = "RATE_LIMITER"
+id = "test-kv-id"
