@@ -1,0 +1,43 @@
+# .github/workflows/test.yml
+#
+# Runs the full test suite on every push to main and on every pull request
+# targeting main. No secrets required — all tests use mocked data and never
+# call the real Google Places API or Cloudflare Workers runtime.
+
+name: Test Suite
+
+on:
+  # Run on direct pushes to main
+  push:
+    branches: [main]
+  # Run on pull requests targeting main (checks the merged result)
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the repository at the commit that triggered this run
+      - uses: actions/checkout@v4
+
+      # Install Node.js 22.x — matches the local development environment
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
+      # npm ci: faster than npm install, installs exact versions from
+      # package-lock.json, and fails if the lockfile is out of sync
+      - name: Install dependencies
+        run: npm ci
+
+      # Backend tests — runs in vitest-pool-workers (Cloudflare workerd runtime)
+      # No GOOGLE_API_KEY needed: worker tests inject env bindings via makeEnv()
+      - name: Run backend tests
+        run: npm test
+
+      # Frontend tests — runs in jsdom via vitest
+      # Covers integration, unit, and security tests for index.html
+      - name: Run frontend tests
+        run: npm run test:frontend
